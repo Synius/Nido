@@ -2029,7 +2029,6 @@ const GCAL_CLIENT_ID = '517933038728-30uaeqhv5eip4nctpvvks1c4tecnk1ce.apps.googl
 const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events';
 let gcalToken = null;
 let gcalTokenExpiry = 0;
-let gcalRefreshTimer = null;
 
 function gcalSetStatus(msg, color='var(--light)') {
   const el = $('gcal-status');
@@ -2038,52 +2037,29 @@ function gcalSetStatus(msg, color='var(--light)') {
   el.textContent = msg;
 }
 
-function gcalSignIn(silent=false) {
+function gcalSignIn() {
   return new Promise((resolve, reject) => {
-    if (!window.google) { reject('Google API non chargée'); return; }
+    if (!window.google) { reject(new Error('Google API non chargée')); return; }
     const client = google.accounts.oauth2.initTokenClient({
       client_id: GCAL_CLIENT_ID,
       scope: GCAL_SCOPES,
-      prompt: silent ? '' : undefined,
       callback: (resp) => {
-        if (resp.error) { reject(resp.error); return; }
+        if (resp.error) { reject(new Error(resp.error)); return; }
         gcalToken = resp.access_token;
-        gcalTokenExpiry = Date.now() + ((resp.expires_in||3600) - 60) * 1000;
-        try { localStorage.setItem('nido-gcal-token', gcalToken); } catch(e) {}
-        scheduleTokenRefresh();
+        gcalTokenExpiry = Date.now() + ((resp.expires_in || 3600) - 60) * 1000;
         resolve(gcalToken);
       }
     });
-    if (silent) client.requestAccessToken({prompt:''});
-    else client.requestAccessToken();
+    client.requestAccessToken();
   });
 }
 
-function scheduleTokenRefresh() {
-  if (gcalRefreshTimer) clearTimeout(gcalRefreshTimer);
-  const delay = gcalTokenExpiry - Date.now();
-  if (delay > 0) {
-    gcalRefreshTimer = setTimeout(async () => {
-      try { await gcalSignIn(true); }
-      catch(e) { gcalToken=null; try{localStorage.removeItem('nido-gcal-token');}catch(e2){} }
-    }, delay);
-  }
-}
-
 async function gcalGetToken() {
-  // Token still valid
   if (gcalToken && Date.now() < gcalTokenExpiry) return gcalToken;
-  // Clear stale token and force interactive sign-in
   gcalToken = null;
-  try { localStorage.removeItem('nido-gcal-token'); } catch(e) {}
-  return await gcalSignIn(false);
+  gcalTokenExpiry = 0;
+  return await gcalSignIn();
 }
-
-// Restore on load + schedule refresh
-try {
-  const t = localStorage.getItem('nido-gcal-token');
-  if (t) { gcalToken=t; gcalTokenExpiry=Date.now()+5*60*1000; scheduleTokenRefresh(); }
-} catch(e) {}
 
 async function gcalFindCalendar(token, name='Famille') {
   const res = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList', {
