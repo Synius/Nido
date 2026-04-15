@@ -1,0 +1,2506 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Nido 🪺</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #FAF7F2; --warm: #F0E8D8; --sand: #D9C9A8;
+    --terracotta: #C4714A; --terra-pale: #F5DDD0;
+    --green: #4A7C5C; --green-pale: #D4E8DC;
+    --plum: #5C3D5C; --plum-pale: #E8DCE8;
+    --blue: #3D5C7C; --blue-pale: #D4E0EC;
+    --amber: #B07D2A; --amber-pale: #F5EAD0;
+    --ink: #1A1612; --mid: #6B5F52; --light: #B0A090; --white: #FFFFFF;
+    --shadow-sm: 0 2px 12px rgba(26,22,18,0.07);
+  }
+  html, body { height: 100%; background: var(--cream); font-family: 'Plus Jakarta Sans', sans-serif; color: var(--ink); overflow: hidden; }
+  .app { display: flex; flex-direction: column; height: 100dvh; max-width: 430px; margin: 0 auto; background: var(--cream); }
+  .screen { display: none; flex-direction: column; height: 100%; }
+  .screen.active { display: flex; }
+
+  /* ONBOARDING */
+  #screen-onboarding { align-items: center; justify-content: center; padding: 40px 32px; text-align: center; }
+  .onb-logo { font-family: 'Fraunces', serif; font-size: 52px; font-weight: 300; color: var(--ink); margin-bottom: 4px; }
+  .onb-logo span { color: var(--terracotta); }
+  .onb-tagline { font-size: 14px; color: var(--light); margin-bottom: 40px; }
+  .onb-label { font-size: 12px; font-weight: 500; color: var(--mid); margin-bottom: 8px; text-align: left; }
+  .onb-input { width: 100%; padding: 14px 16px; border: 1.5px solid var(--warm); border-radius: 14px; background: var(--white); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; color: var(--ink); outline: none; margin-bottom: 16px; transition: border-color 0.2s; }
+  .onb-input:focus { border-color: var(--sand); }
+  .avatar-choice { display: flex; gap: 12px; margin-bottom: 32px; }
+  .avatar-btn { flex: 1; padding: 16px; border-radius: 14px; border: 2px solid var(--warm); background: var(--white); cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--mid); transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .avatar-btn .av-emoji { font-size: 28px; }
+  .avatar-btn.sel-v { border-color: var(--terracotta); background: var(--terra-pale); color: var(--terracotta); }
+  .avatar-btn.sel-m { border-color: var(--green); background: var(--green-pale); color: var(--green); }
+  .onb-btn { width: 100%; padding: 15px; border: none; border-radius: 14px; background: var(--terracotta); color: white; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 500; cursor: pointer; }
+  .onb-btn:active { opacity: 0.85; }
+  .onb-divider { width: 40px; height: 2px; background: var(--sand); border-radius: 1px; margin: 28px auto; }
+
+  /* HEADER */
+  .header { padding: 20px 24px 14px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .logo { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 300; color: var(--ink); }
+  .logo span { color: var(--terracotta); }
+  .user-badge { display: flex; align-items: center; gap: 8px; padding: 5px 12px 5px 5px; background: var(--white); border-radius: 100px; box-shadow: var(--shadow-sm); cursor: pointer; }
+  .user-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; color: white; font-weight: 500; }
+  .user-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 5px; padding: 0 24px 14px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { display: flex; align-items: center; gap: 5px; padding: 8px 13px; border-radius: 100px; border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 500; white-space: nowrap; transition: all 0.2s; background: var(--warm); color: var(--mid); }
+  .tab.active { color: white; }
+  .tab.active.courses { background: var(--terracotta); }
+  .tab.active.taches { background: var(--green); }
+  .tab.active.admin { background: var(--blue); }
+  .tab.active.events { background: var(--plum); }
+  .tab.active.feedback { background: var(--amber); }
+
+  /* CONTENT */
+  .content { flex: 1; overflow-y: auto; padding: 0 24px 24px; scrollbar-width: none; }
+  .content::-webkit-scrollbar { display: none; }
+  .section { display: none; animation: fadeUp 0.3s ease; }
+  .section.active { display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .section-title { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 300; margin-bottom: 4px; }
+  .section-sub { font-size: 12px; color: var(--light); margin-bottom: 14px; }
+
+  /* PROGRESS */
+  .progress-label { font-size: 11px; color: var(--light); margin-bottom: 5px; }
+  .progress-bar-wrap { background: var(--warm); border-radius: 100px; height: 5px; margin-bottom: 14px; overflow: hidden; }
+  .progress-bar { height: 100%; border-radius: 100px; transition: width 0.4s ease; }
+  .progress-bar.courses { background: var(--terracotta); }
+  .progress-bar.taches { background: var(--green); }
+
+  /* CAT PILLS */
+  .cat-pills { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .cat-pill { padding: 5px 11px; border-radius: 100px; border: 1.5px solid var(--warm); background: none; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 500; color: var(--mid); cursor: pointer; transition: all 0.15s; }
+  .cat-pill.terra.active { border-color: var(--terracotta); background: var(--terra-pale); color: var(--terracotta); }
+  .cat-pill.green.active { border-color: var(--green); background: var(--green-pale); color: var(--green); }
+
+  /* ADD ROW */
+  .add-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .add-input { flex: 1; padding: 11px 15px; border: 1.5px solid var(--warm); border-radius: 13px; background: var(--white); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; color: var(--ink); outline: none; transition: border-color 0.2s; }
+  .add-input:focus { border-color: var(--sand); }
+  .add-input::placeholder { color: var(--light); }
+  .add-btn { width: 44px; height: 44px; border-radius: 13px; border: none; cursor: pointer; font-size: 22px; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; flex-shrink: 0; color: white; }
+  .add-btn:active { transform: scale(0.92); }
+  .add-btn.courses { background: var(--terracotta); }
+  .add-btn.taches { background: var(--green); }
+  .add-btn.amber { background: var(--amber); }
+
+  /* ITEMS */
+  .items-list { display: flex; flex-direction: column; gap: 7px; }
+  .item { display: flex; align-items: center; gap: 11px; padding: 13px 14px; background: var(--white); border-radius: 15px; box-shadow: var(--shadow-sm); animation: slideIn 0.22s ease; }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
+  .item.done { opacity: 0.42; }
+  .item.done .item-text { text-decoration: line-through; }
+  .item-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--sand); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: all 0.2s; font-size: 11px; color: transparent; }
+  .item.done .item-check { border-color: transparent; color: white; }
+  .item.done.courses .item-check { background: var(--terracotta); }
+  .item.done.taches .item-check { background: var(--green); }
+  .item-text { flex: 1; font-size: 14px; color: var(--ink); }
+  .item-tag { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 100px; color: var(--mid); background: var(--warm); flex-shrink: 0; }
+  .item-author { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; font-weight: 500; flex-shrink: 0; }
+  .item-delete { width: 26px; height: 26px; border: none; background: none; color: var(--light); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.15s; flex-shrink: 0; border-radius: 7px; }
+  .item:hover .item-delete, .item:active .item-delete { opacity: 1; }
+
+  /* EVENTS */
+  .bebe-banner { background: linear-gradient(135deg, var(--terra-pale), #FDE8F0); border-radius: 16px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+  .bebe-icon { font-size: 30px; }
+  .bebe-label { font-size: 10px; font-weight: 500; color: var(--terracotta); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+  .bebe-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 300; color: var(--ink); margin-bottom: 1px; }
+  .bebe-sub { font-size: 11px; color: var(--mid); }
+  .wide-btn { width: 100%; border-radius: 13px; height: 44px; font-size: 14px; font-weight: 500; font-family: 'Plus Jakarta Sans', sans-serif; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; cursor: pointer; color: white; margin-bottom: 14px; transition: opacity 0.15s; }
+  .wide-btn:active { opacity: 0.85; }
+  .wide-btn.plum { background: var(--plum); }
+  .wide-btn.blue { background: var(--blue); }
+  .event-card { background: var(--white); border-radius: 16px; padding: 13px; margin-bottom: 9px; box-shadow: var(--shadow-sm); animation: slideIn 0.22s ease; }
+  .event-date-box { background: var(--plum); border-radius: 10px; padding: 7px 9px; text-align: center; flex-shrink: 0; min-width: 44px; }
+  .event-day { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 300; color: white; line-height: 1; }
+  .event-month { font-size: 9px; font-weight: 500; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.4px; }
+  .event-info { flex: 1; }
+  .event-title { font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+  .event-meta { font-size: 12px; color: var(--light); }
+
+  /* ADMIN */
+  .admin-card { background: var(--white); border-radius: 16px; padding: 13px 14px; margin-bottom: 9px; box-shadow: var(--shadow-sm); animation: slideIn 0.22s ease; }
+  .admin-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+  .admin-card-title { font-size: 14px; font-weight: 500; color: var(--ink); display: flex; align-items: center; gap: 8px; }
+  .admin-icon-box { width: 26px; height: 26px; border-radius: 7px; background: var(--blue-pale); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .admin-status { font-size: 10px; font-weight: 500; padding: 3px 8px; border-radius: 100px; }
+  .s-ok { background: var(--green-pale); color: var(--green); }
+  .s-todo { background: var(--terra-pale); color: var(--terracotta); }
+  .s-wait { background: var(--blue-pale); color: var(--blue); }
+  .admin-note { font-size: 12px; color: var(--mid); line-height: 1.5; }
+
+  /* CARD ACTIONS */
+  .card-actions { display: flex; gap: 6px; margin-top: 10px; }
+  .card-btn { flex: 1; padding: 7px; border-radius: 9px; border: 1.5px solid var(--warm); background: none; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; color: var(--mid); }
+  .card-btn.edit:hover { border-color: var(--plum); background: var(--plum-pale); color: var(--plum); }
+  .card-btn.edit-blue:hover { border-color: var(--blue); background: var(--blue-pale); color: var(--blue); }
+  .card-btn.del:hover { border-color: #e57373; background: #fdecea; color: #c62828; }
+
+  /* FEEDBACK */
+  .feedback-intro { background: var(--amber-pale); border-radius: 13px; padding: 12px 14px; margin-bottom: 14px; font-size: 13px; color: var(--amber); line-height: 1.5; }
+  .feedback-card { background: var(--white); border-radius: 16px; padding: 13px 14px; margin-bottom: 9px; box-shadow: var(--shadow-sm); animation: slideIn 0.22s ease; }
+  .fb-header { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .fb-dot { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; font-weight: 500; flex-shrink: 0; }
+  .fb-author { font-size: 12px; font-weight: 500; color: var(--mid); }
+  .fb-date { font-size: 11px; color: var(--light); margin-left: auto; }
+  .fb-text { font-size: 14px; color: var(--ink); line-height: 1.5; margin-bottom: 8px; }
+  .fb-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .fb-tag { font-size: 10px; font-weight: 500; padding: 3px 8px; border-radius: 100px; cursor: pointer; border: 1.5px solid var(--warm); color: var(--mid); background: none; font-family: 'Plus Jakarta Sans'; transition: all 0.15s; }
+  .fb-tag.t-idea { background: var(--amber-pale); border-color: var(--amber); color: var(--amber); }
+  .fb-tag.t-bug { background: var(--terra-pale); border-color: var(--terracotta); color: var(--terracotta); }
+  .fb-tag.t-done { background: var(--green-pale); border-color: var(--green); color: var(--green); }
+  .fb-del { margin-left: auto; font-size: 10px; color: var(--light); border: none; background: none; cursor: pointer; font-family: 'Plus Jakarta Sans'; }
+
+  /* VERSIONS */
+  .version-card { background: var(--white); border-radius: 13px; padding: 13px 14px; margin-bottom: 8px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 12px; }
+  .version-badge { background: var(--mid); color: white; border-radius: 8px; padding: 4px 8px; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .version-info { flex: 1; }
+  .version-label { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+  .version-date { font-size: 11px; color: var(--light); }
+  .version-restore { font-size: 11px; font-weight: 500; padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--warm); background: none; cursor: pointer; color: var(--mid); font-family: 'Plus Jakarta Sans'; transition: all 0.15s; }
+  .version-restore:hover { border-color: var(--green); background: var(--green-pale); color: var(--green); }
+  .version-card.current .version-badge { background: var(--green); }
+
+  /* RAYON GROUPS */
+  .rayon-group { margin-bottom: 16px; }
+  .rayon-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 0 2px; }
+  .rayon-emoji { font-size: 16px; }
+  .rayon-name { font-size: 12px; font-weight: 600; color: var(--mid); text-transform: uppercase; letter-spacing: 0.5px; }
+  .rayon-count { font-size: 11px; color: var(--light); margin-left: auto; }
+  .item-qty { font-size: 11px; font-weight: 600; color: var(--terracotta); background: var(--terra-pale); padding: 2px 7px; border-radius: 100px; flex-shrink: 0; }
+  .item-edit-btn { width: 26px; height: 26px; border: none; background: none; color: var(--light); cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.15s; flex-shrink: 0; }
+  .item:hover .item-edit-btn, .item:active .item-edit-btn { opacity: 1; }
+
+  /* DEADLINE BADGE */
+  .deadline-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 100px; flex-shrink: 0; }
+  .deadline-ok { background: var(--green-pale); color: var(--green); }
+  .deadline-soon { background: var(--amber-pale); color: var(--amber); }
+  .deadline-late { background: #fdecea; color: #c62828; }
+  .tache-content { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; cursor: pointer; }
+  .tache-text { font-size: 14px; color: var(--ink); }
+  .tache-sub { font-size: 11px; color: var(--light); }
+  /* EVENT VIEW TOGGLE */
+  .ev-view-btn { flex:1; padding:7px; border-radius:10px; border:1.5px solid var(--warm); background:none; font-family:'Plus Jakarta Sans',sans-serif; font-size:12px; font-weight:500; color:var(--mid); cursor:pointer; transition:all 0.15s; }
+  .ev-view-btn.active { background:var(--plum-pale); border-color:var(--plum); color:var(--plum); }
+
+  /* MONTH VIEW */
+  .cal-month-view { background:var(--white); border-radius:16px; padding:12px; box-shadow:var(--shadow-sm); }
+  .cal-month-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .cal-month-nav-title { font-family:'Fraunces',serif; font-size:16px; font-weight:300; color:var(--ink); }
+  .cal-month-grid-header { display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:4px; }
+  .cal-month-grid-header span { text-align:center; font-size:10px; font-weight:600; color:var(--light); padding:3px 0; }
+  .cal-month-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+  .cal-month-day { aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:8px; cursor:pointer; transition:background 0.15s; position:relative; }
+  .cal-month-day:hover { background:var(--warm); }
+  .cal-month-day.today .cal-day-num { background:var(--plum); color:white; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; }
+  .cal-month-day.has-event::after { content:''; position:absolute; bottom:3px; width:4px; height:4px; border-radius:50%; background:var(--plum); }
+  .cal-month-day.past { opacity:0.4; }
+  .cal-month-day.other-month { opacity:0.25; }
+  .cal-day-num { font-size:12px; color:var(--ink); font-weight:400; }
+  .cal-month-selected { background:var(--plum-pale) !important; }
+  .cal-month-selected .cal-day-num { color:var(--plum); font-weight:600; }
+  .cal-day-events { margin-top:8px; }
+  .cal-day-event-item { background:var(--plum-pale); border-radius:8px; padding:6px 10px; margin-bottom:5px; font-size:12px; color:var(--plum); font-weight:500; }
+
+  /* WEEK VIEW */
+  .cal-week-view { background:var(--white); border-radius:16px; padding:12px; box-shadow:var(--shadow-sm); }
+  .cal-week-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .cal-week-nav-title { font-family:'Fraunces',serif; font-size:15px; font-weight:300; color:var(--ink); }
+  .cal-week-days { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:10px; }
+  .cal-week-day-col { display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .cal-week-day-label { font-size:10px; font-weight:600; color:var(--light); text-transform:uppercase; }
+  .cal-week-day-num { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; color:var(--ink); cursor:pointer; }
+  .cal-week-day-num.today { background:var(--plum); color:white; }
+  .cal-week-day-num.has-event { border:2px solid var(--plum); }
+  .cal-week-day-num.past { opacity:0.4; }
+  .cal-week-events { display:flex; flex-direction:column; gap:6px; }
+  .suggestion-item { padding: 10px 14px; font-size: 14px; color: var(--ink); cursor: pointer; border-bottom: 1px solid var(--warm); display: flex; align-items: center; gap: 8px; }
+  .suggestion-item:last-child { border-bottom: none; }
+  .suggestion-item:active { background: var(--terra-pale); }
+  .suggestion-rayon { font-size: 10px; color: var(--light); margin-left: auto; }
+
+  /* RECIPE */
+  .recipe-card { background: var(--white); border-radius: 13px; padding: 12px 14px; margin-bottom: 8px; box-shadow: var(--shadow-sm); }
+  .recipe-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .recipe-card-title { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .recipe-card-ings { font-size: 12px; color: var(--mid); line-height: 1.6; }
+  .recipe-add-btn { font-size: 11px; font-weight: 500; padding: 5px 10px; border-radius: 8px; border: 1.5px solid var(--terracotta); background: var(--terra-pale); color: var(--terracotta); cursor: pointer; font-family: 'Plus Jakarta Sans'; }
+  .recipe-ing-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: var(--warm); border-radius: 8px; margin-bottom: 5px; font-size: 13px; }
+  .recipe-ing-del { border: none; background: none; color: var(--light); cursor: pointer; font-size: 16px; }
+
+  /* HABITS */
+  .habit-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .habit-chip { padding: 7px 13px; border-radius: 100px; background: var(--white); border: 1.5px solid var(--warm); font-size: 13px; color: var(--ink); cursor: pointer; font-family: 'Plus Jakarta Sans'; transition: all 0.15s; box-shadow: var(--shadow-sm); }
+  .habit-chip:active { background: var(--terra-pale); border-color: var(--terracotta); color: var(--terracotta); }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(26,22,18,0.45); display: flex; align-items: flex-end; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: var(--cream); border-radius: 24px 24px 0 0; padding: 24px; width: 100%; max-width: 430px; transform: translateY(40px); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); max-height: 90dvh; overflow-y: auto; }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-handle { width: 36px; height: 4px; background: var(--sand); border-radius: 2px; margin: 0 auto 18px; }
+  .modal-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 300; margin-bottom: 14px; }
+  .modal-input { width: 100%; padding: 12px 15px; border: 1.5px solid var(--warm); border-radius: 13px; background: var(--white); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; color: var(--ink); outline: none; margin-bottom: 9px; transition: border-color 0.2s; }
+  .modal-input:focus { border-color: var(--sand); }
+  .modal-row { display: flex; gap: 9px; margin-bottom: 9px; }
+  .modal-row .modal-input { margin-bottom: 0; }
+  .modal-ok { width: 100%; padding: 14px; border: none; border-radius: 13px; color: white; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 5px; }
+  .modal-ok:active { opacity: 0.85; }
+  .modal-ok.plum { background: var(--plum); }
+  .modal-ok.blue { background: var(--blue); }
+  .modal-cancel { width: 100%; padding: 11px; border: none; background: none; color: var(--light); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; cursor: pointer; margin-top: 2px; }
+
+  /* CALENDAR */
+  .cal-wrap { background: var(--white); border-radius: 14px; padding: 12px; border: 1.5px solid var(--warm); margin-bottom: 0; }
+  .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .cal-arrow { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--mid); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+  .cal-arrow:hover { background: var(--warm); }
+  .cal-month-label { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 300; color: var(--ink); }
+  .cal-days-header { display: grid; grid-template-columns: repeat(7,1fr); margin-bottom: 4px; }
+  .cal-days-header span { text-align: center; font-size: 11px; font-weight: 500; color: var(--light); padding: 4px 0; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+  .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 13px; color: var(--ink); cursor: pointer; border: none; background: none; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.15s; }
+  .cal-day:hover:not(.empty-day) { background: var(--plum-pale); }
+  .cal-day.today { color: var(--plum); font-weight: 600; }
+  .cal-day.selected { background: var(--plum) !important; color: white !important; font-weight: 600; }
+  .cal-day.empty-day { cursor: default; }
+
+  .empty { text-align: center; padding: 36px 20px; color: var(--light); }
+  .empty-icon { font-size: 34px; margin-bottom: 8px; }
+  .empty-text { font-size: 13px; }
+  .loading { text-align: center; padding: 28px; color: var(--light); font-size: 13px; }
+  .gcal-badge { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 100px; background: #E8F0FE; color: #1967D2; flex-shrink: 0; }
+  .gcal-sync-btn { font-size: 11px; padding: 5px 10px; border-radius: 8px; border: 1.5px solid var(--warm); background: none; cursor: pointer; color: var(--mid); font-family: 'Plus Jakarta Sans'; margin-left: auto; }
+  .gcal-sync-btn:hover { background: #E8F0FE; border-color: #1967D2; color: #1967D2; }
+
+  /* TIME WHEEL */
+  .time-wheel-wrap { display: flex; align-items: center; gap: 8px; background: var(--white); border: 1.5px solid var(--warm); border-radius: 13px; padding: 8px 12px; margin-bottom: 9px; }
+  .time-wheel-label { font-size: 12px; color: var(--mid); font-weight: 500; flex-shrink: 0; }
+  .time-wheel { flex: 1; display: flex; gap: 4px; align-items: center; justify-content: center; }
+  .wheel-col { display: flex; flex-direction: column; align-items: center; height: 120px; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; flex: 1; }
+  .wheel-col::-webkit-scrollbar { display: none; }
+  .wheel-item { scroll-snap-align: center; min-height: 40px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 400; color: var(--light); font-family: 'Fraunces', serif; cursor: pointer; width: 100%; transition: all 0.15s; border-radius: 8px; }
+  .wheel-item.selected { color: var(--ink); font-weight: 600; font-size: 24px; }
+  .wheel-sep { font-size: 24px; font-weight: 300; color: var(--mid); font-family: 'Fraunces', serif; margin: 0 2px; }
+  .wheel-selector { position: relative; }
+  .wheel-overlay { position: absolute; top: 0; left: 0; right: 0; height: 40px; pointer-events: none; background: linear-gradient(to bottom, var(--white), transparent); border-radius: 13px 13px 0 0; }
+  .wheel-overlay-bottom { position: absolute; bottom: 0; left: 0; right: 0; height: 40px; pointer-events: none; background: linear-gradient(to top, var(--white), transparent); border-radius: 0 0 13px 13px; }
+  .time-none-btn { font-size: 11px; color: var(--light); border: none; background: none; cursor: pointer; font-family: 'Plus Jakarta Sans'; padding: 0; margin-left: 4px; }
+
+  /* ADMIN TABS */
+  .admin-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+  .admin-tab { flex: 1; padding: 8px; border-radius: 10px; border: 1.5px solid var(--warm); background: none; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 500; color: var(--mid); cursor: pointer; transition: all 0.15s; text-align: center; }
+  .admin-tab.active { background: var(--blue-pale); border-color: var(--blue); color: var(--blue); }
+  .tab.active.home { background: var(--ink); }
+
+  /* DASHBOARD */
+  .dash-block { background: var(--white); border-radius: 16px; padding: 14px; margin-bottom: 12px; box-shadow: var(--shadow-sm); }
+  .dash-block-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .dash-block-title { font-size: 13px; font-weight: 600; color: var(--mid); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+  .dash-block-count { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 100px; background: var(--warm); color: var(--mid); }
+  .dash-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--warm); }
+  .dash-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .dash-item-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dash-item-text { flex: 1; font-size: 13px; color: var(--ink); }
+  .dash-item-meta { font-size: 11px; color: var(--light); flex-shrink: 0; }
+  .dash-empty { font-size: 13px; color: var(--light); font-style: italic; }
+  .dash-bebe { background: linear-gradient(135deg, #FDE8F0, var(--terra-pale)); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+  .dash-bebe-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 300; color: var(--ink); margin-bottom: 4px; }
+  .dash-bebe-sub { font-size: 13px; color: var(--mid); }
+
+  /* ASSIGNEE BADGE */
+  .assignee-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; flex-shrink: 0; }
+  .assignee-V { background: var(--terra-pale); color: var(--terracotta); }
+  .assignee-P { background: var(--green-pale); color: var(--green); }
+  .assignee-both { background: var(--blue-pale); color: var(--blue); }
+  .urgent-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 100px; background: #c62828; color: white; flex-shrink: 0; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+</style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<div class="app">
+
+  <!-- ONBOARDING -->
+  <div id="screen-onboarding" class="screen active">
+    <div class="onb-logo">nido <span>🪺</span></div>
+    <div class="onb-tagline">Votre espace familial partagé</div>
+    <div class="onb-divider"></div>
+    <div style="width:100%;max-width:320px">
+      <div class="onb-label">Ton prénom</div>
+      <input class="onb-input" id="onb-name" placeholder="ex: Valentin" maxlength="20">
+      <div class="onb-label">Tu es…</div>
+      <div class="avatar-choice">
+        <button class="avatar-btn sel-v" id="btn-v"><span class="av-emoji">👨</span><span>Papa</span></button>
+        <button class="avatar-btn" id="btn-m"><span class="av-emoji">👩</span><span>Maman</span></button>
+      </div>
+      <button class="onb-btn" id="btn-start">Entrer dans Nido →</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="screen-main" class="screen">
+    <div class="header">
+      <div class="logo">nido <span>🪺</span></div>
+      <div class="user-badge" id="user-badge">
+        <div class="user-dot" id="hdr-dot"></div>
+        <div class="user-name" id="hdr-name"></div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active home" data-tab="home">🏠 Accueil</button>
+      <button class="tab courses" data-tab="courses">🛒 Courses</button>
+      <button class="tab taches" data-tab="taches">✅ Tâches</button>
+      <button class="tab admin" data-tab="admin">📋 Administratif</button>
+      <button class="tab events" data-tab="events">📅 Événements</button>
+      <button class="tab feedback" data-tab="feedback">💬 Améliorations</button>
+    </div>
+    <div class="content">
+
+      <!-- HOME -->
+      <div id="section-home" class="section active">
+        <div id="home-greeting" style="margin-bottom:16px;">
+          <div class="section-title" id="home-title">Bonjour 👋</div>
+          <div class="section-sub" id="home-date"></div>
+        </div>
+        <div id="home-blocks"></div>
+      </div>
+
+      <!-- COURSES -->
+      <div id="section-courses" class="section">
+        <div class="section-title">Courses</div>
+        <div class="progress-label" id="courses-lbl"></div>
+        <div class="progress-bar-wrap"><div class="progress-bar courses" id="courses-bar" style="width:0"></div></div>
+
+        <!-- SOUS-ONGLETS -->
+        <div class="admin-tabs" id="courses-subtabs">
+          <button class="admin-tab active" id="ctab-list" data-ctab="list">🛒 Liste</button>
+          <button class="admin-tab" id="ctab-recipes" data-ctab="recipes">🍽 Recettes</button>
+          <button class="admin-tab" id="ctab-habits" data-ctab="habits">⭐ Habitudes</button>
+        </div>
+
+        <!-- LISTE -->
+        <div id="courses-sub-list">
+          <div class="add-row" style="position:relative">
+            <div style="flex:1;position:relative">
+              <input class="add-input" id="ci" placeholder="Ajouter un article…" autocomplete="off" style="width:100%">
+              <div id="ci-suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--warm);border-radius:0 0 13px 13px;z-index:50;max-height:180px;overflow-y:auto;"></div>
+            </div>
+            <button class="add-btn courses" id="btn-add-course">+</button>
+          </div>
+          <div id="courses-list"><div class="loading">Chargement…</div></div>
+          <button class="wide-btn" id="btn-clear-done" style="background:var(--light);margin-top:12px;display:none;">🗑 Effacer les articles rayés</button>
+        </div>
+
+        <!-- RECETTES -->
+        <div id="courses-sub-recipes" style="display:none;">
+          <div id="courses-recipes-list" style="margin-bottom:12px;"></div>
+          <button class="wide-btn" id="btn-open-add-recipe2" style="background:var(--terracotta);">+ Créer une recette</button>
+        </div>
+
+        <!-- HABITUDES -->
+        <div id="courses-sub-habits" style="display:none;">
+          <p style="font-size:12px;color:var(--light);margin-bottom:12px;">Articles que vous achetez souvent — tap pour ajouter à la liste.</p>
+          <div id="courses-habits-chips"></div>
+        </div>
+      </div>
+
+      <!-- TACHES -->
+      <div id="section-taches" class="section">
+        <div class="section-title">À faire</div>
+        <div class="section-sub">Tâches à accomplir avant l'arrivée de bébé</div>
+        <div class="admin-tabs">
+          <button class="admin-tab active" id="tache-tab-active">📋 En cours / À faire</button>
+          <button class="admin-tab done-tab" id="tache-tab-done">✅ Fait</button>
+        </div>
+        <div class="progress-label" id="taches-lbl"></div>
+        <div class="progress-bar-wrap"><div class="progress-bar taches" id="taches-bar" style="width:0"></div></div>
+        <button class="wide-btn" id="btn-add-tache-open" style="background:var(--green);margin-bottom:14px;">+ Ajouter une tâche</button>
+        <div id="taches-list"><div class="loading">Chargement…</div></div>
+      </div>
+
+      <!-- ADMIN -->
+      <div id="section-admin" class="section">
+        <div class="section-title">Administratif</div>
+        <div class="section-sub">Démarches, documents, à ne pas oublier</div>
+        <div class="admin-tabs">
+          <button class="admin-tab active" id="admin-tab-active">📋 En cours / À faire</button>
+          <button class="admin-tab done-tab" id="admin-tab-done">✅ Fait</button>
+        </div>
+        <button class="wide-btn blue" id="btn-open-admin">+ Ajouter une démarche</button>
+        <div id="admin-list"><div class="loading">Chargement…</div></div>
+      </div>
+
+      <!-- EVENTS -->
+      <div id="section-events" class="section">
+        <div class="bebe-banner">
+          <div class="bebe-icon">🤰</div>
+          <div>
+            <div class="bebe-label">En route !</div>
+            <div class="bebe-title">Bébé arrive bientôt</div>
+            <div class="bebe-sub">Rendez-vous & grandes dates</div>
+          </div>
+        </div>
+
+        <!-- TABS à venir / passés -->
+        <div class="admin-tabs" style="margin-bottom:12px;">
+          <button class="admin-tab active" id="ev-tab-upcoming">📅 À venir</button>
+          <button class="admin-tab done-tab" id="ev-tab-past">🕓 Passés</button>
+        </div>
+
+        <!-- VIEW TOGGLE -->
+        <div style="display:flex;gap:6px;margin-bottom:12px;">
+          <button class="ev-view-btn active" id="ev-view-list" data-view="list">☰ Liste</button>
+          <button class="ev-view-btn" id="ev-view-month" data-view="month">📆 Mois</button>
+          <button class="ev-view-btn" id="ev-view-week" data-view="week">📋 Semaine</button>
+        </div>
+
+        <button class="wide-btn plum" id="btn-open-event" style="margin-bottom:8px;">+ Ajouter un événement</button>
+        <button class="wide-btn" id="btn-gcal-sync" style="background:var(--white);color:var(--mid);border:1.5px solid var(--warm);margin-bottom:8px;">📅 Synchroniser Google Calendar</button>
+        <div id="gcal-status" style="font-size:12px;color:var(--light);text-align:center;margin-bottom:10px;display:none;"></div>
+        <div id="events-list"><div class="loading">Chargement…</div></div>
+      </div>
+
+      <!-- FEEDBACK -->
+      <div id="section-feedback" class="section">
+        <div class="section-title">Améliorations</div>
+        <div class="feedback-intro">💡 Un bug, une idée ? Écrivez-le ici — vous le verrez tous les deux.</div>
+        <div class="add-row">
+          <input class="add-input" id="fi" placeholder="Votre suggestion…">
+          <button class="add-btn amber" id="btn-add-feedback">+</button>
+        </div>
+        <div id="feedback-list"><div class="loading">Chargement…</div></div>
+        <div style="margin-top:16px">
+          <button class="wide-btn" id="btn-send-claude" style="background:#7C3AED;margin-bottom:8px;">🤖 Envoyer à Claude</button>
+          <button class="wide-btn" id="btn-open-versions" style="background:var(--mid);">🕓 Historique des versions</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- RECIPES MODAL -->
+<div class="modal-overlay" id="recipes-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div class="modal-title" style="margin-bottom:0;">🍽 Mes recettes</div>
+      <span style="font-size:11px;color:var(--light);background:var(--warm);padding:3px 8px;border-radius:100px;">Sous-menu Courses</span>
+    </div>
+    <div id="recipes-list" style="max-height:320px;overflow-y:auto;margin-bottom:12px;"></div>
+    <button class="modal-ok" id="btn-open-add-recipe" style="background:var(--terracotta)">+ Créer une recette</button>
+    <button class="modal-cancel" data-close="recipes-modal">← Retour aux courses</button>
+  </div>
+</div>
+
+<!-- ADD RECIPE MODAL -->
+<div class="modal-overlay" id="add-recipe-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nouvelle recette</div>
+    <input class="modal-input" id="recipe-name" placeholder="Nom de la recette (ex: Pasta bolognaise)">
+    <div id="recipe-ingredients" style="margin-bottom:8px;"></div>
+    <div class="modal-row">
+      <input class="modal-input" id="recipe-ing-name" placeholder="Ingrédient" style="flex:2;margin-bottom:0">
+      <input class="modal-input" id="recipe-ing-qty" placeholder="Qté" style="flex:.6;margin-bottom:0">
+      <select class="modal-input" id="recipe-ing-unit" style="flex:.9;margin-bottom:0;cursor:pointer">
+        <option value="">—</option>
+        <option value="pièce(s)">pcs</option>
+        <option value="kg">kg</option>
+        <option value="g">g</option>
+        <option value="L">L</option>
+        <option value="cl">cl</option>
+        <option value="sachet(s)">sach.</option>
+        <option value="boîte(s)">boîte</option>
+      </select>
+      <button class="add-btn courses" id="btn-add-ing" style="width:38px;height:38px;font-size:18px;flex-shrink:0;">+</button>
+    </div>
+    <button class="modal-ok" id="btn-save-recipe" style="background:var(--terracotta);margin-top:10px">Enregistrer la recette</button>
+    <button class="modal-cancel" data-close="add-recipe-modal">Annuler</button>
+  </div>
+</div>
+
+<!-- EDIT RECIPE MODAL -->
+<div class="modal-overlay" id="edit-recipe-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Modifier la recette</div>
+    <input class="modal-input" id="edit-recipe-name" placeholder="Nom de la recette">
+    <div id="edit-recipe-ingredients" style="margin-bottom:8px;"></div>
+    <div class="modal-row">
+      <input class="modal-input" id="edit-recipe-ing-name" placeholder="Ingrédient" style="flex:2;margin-bottom:0">
+      <input class="modal-input" id="edit-recipe-ing-qty" placeholder="Qté" style="flex:.6;margin-bottom:0">
+      <select class="modal-input" id="edit-recipe-ing-unit" style="flex:.9;margin-bottom:0;cursor:pointer">
+        <option value="">—</option>
+        <option value="pièce(s)">pcs</option>
+        <option value="kg">kg</option>
+        <option value="g">g</option>
+        <option value="L">L</option>
+        <option value="cl">cl</option>
+        <option value="sachet(s)">sach.</option>
+        <option value="boîte(s)">boîte</option>
+      </select>
+      <button class="add-btn courses" id="btn-edit-add-ing" style="width:38px;height:38px;font-size:18px;flex-shrink:0;">+</button>
+    </div>
+    <button class="modal-ok" id="btn-update-recipe" style="background:var(--terracotta);margin-top:10px">Enregistrer</button>
+    <button class="modal-cancel" data-close="edit-recipe-modal">Annuler</button>
+  </div>
+</div>
+
+<!-- HABITS MODAL -->
+<!-- CLAUDE MODAL -->
+<div class="modal-overlay" id="claude-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Envoyer à Claude 🤖</div>
+    <p style="font-size:13px;color:var(--mid);margin-bottom:12px;line-height:1.5;">Copiez ce message et collez-le dans Claude pour qu'il améliore Nido automatiquement.</p>
+    <div id="claude-msg" style="background:var(--white);border:1.5px solid var(--warm);border-radius:13px;padding:14px;font-size:12px;color:var(--ink);line-height:1.6;max-height:280px;overflow-y:auto;white-space:pre-wrap;font-family:'Plus Jakarta Sans',sans-serif;"></div>
+    <button class="modal-ok" id="btn-share-claude" style="background:#7C3AED;margin-top:12px;">📤 Partager</button>
+    <button class="modal-ok" id="btn-copy-claude" style="background:var(--mid);margin-top:6px;">📋 Copier le message</button>
+    <button class="modal-cancel" data-close="claude-modal">Fermer</button>
+  </div>
+</div>
+
+<!-- VERSIONS MODAL -->
+<div class="modal-overlay" id="versions-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Historique des versions</div>
+    <p style="font-size:12px;color:var(--light);margin-bottom:14px;">Les versions précédentes de Nido. Cliquez pour restaurer.</p>
+    <div id="versions-list" style="max-height:360px;overflow-y:auto;"></div>
+    <button class="modal-cancel" data-close="versions-modal">Fermer</button>
+  </div>
+</div>
+<!-- EDIT COURSE MODAL -->
+<div class="modal-overlay" id="edit-course-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Modifier l'article</div>
+    <input class="modal-input" id="edit-course-name" placeholder="Nom de l'article">
+    <div class="modal-row">
+      <input class="modal-input" id="edit-course-qty" placeholder="Qté" type="number" min="0" step="0.1" style="flex:.7;margin-bottom:0">
+      <select class="modal-input" id="edit-course-unit" style="flex:1.3;margin-bottom:0;cursor:pointer">
+        <option value="">— unité —</option>
+        <option value="pièce(s)">pièce(s)</option>
+        <option value="kg">kg</option>
+        <option value="g">g</option>
+        <option value="L">L</option>
+        <option value="cl">cl</option>
+        <option value="sachet(s)">sachet(s)</option>
+        <option value="boîte(s)">boîte(s)</option>
+        <option value="bouteille(s)">bouteille(s)</option>
+        <option value="paquet(s)">paquet(s)</option>
+      </select>
+    </div>
+    <div style="margin-top:9px;font-size:12px;color:var(--light);">Rayon : <span id="edit-course-rayon-label" style="color:var(--mid);font-weight:500;"></span></div>
+    <button class="modal-ok" id="btn-save-course" style="background:var(--terracotta);margin-top:10px">Enregistrer</button>
+    <button class="modal-cancel" data-close="edit-course-modal">Annuler</button>
+  </div>
+</div>
+
+<!-- ADD TACHE MODAL -->
+<div class="modal-overlay" id="add-tache-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nouvelle tâche</div>
+    <input class="modal-input" id="ti" placeholder="Description de la tâche">
+    <select class="modal-input" id="ti-tag" style="cursor:pointer">
+      <option value="bébé">🍼 Bébé</option>
+      <option value="maison">🏠 Maison</option>
+      <option value="médical">🏥 Médical</option>
+      <option value="perso">👤 Perso</option>
+    </select>
+    <select class="modal-input" id="ti-assignee" style="cursor:pointer">
+      <option value="both">👫 Valentin & Perrine</option>
+      <option value="V">👨 Valentin</option>
+      <option value="P">👩 Perrine</option>
+    </select>
+    <button class="modal-ok" id="btn-add-tache" style="background:var(--green)">Ajouter</button>
+    <button class="modal-cancel" data-close="add-tache-modal">Annuler</button>
+  </div>
+</div>
+
+<!-- EDIT TACHE MODAL -->
+<div class="modal-overlay" id="edit-tache-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Modifier la tâche</div>
+    <input class="modal-input" id="edit-tache-text" placeholder="Description">
+    <select class="modal-input" id="edit-tache-tag" style="cursor:pointer">
+      <option value="bébé">🍼 Bébé</option>
+      <option value="maison">🏠 Maison</option>
+      <option value="médical">🏥 Médical</option>
+      <option value="perso">👤 Perso</option>
+    </select>
+    <select class="modal-input" id="edit-tache-assignee" style="cursor:pointer">
+      <option value="both">👫 Valentin & Perrine</option>
+      <option value="V">👨 Valentin</option>
+      <option value="P">👩 Perrine</option>
+    </select>
+    <div class="cal-wrap">
+      <div class="cal-nav">
+        <button class="cal-arrow" id="cal3-prev">‹</button>
+        <div class="cal-month-label" id="cal-label3"></div>
+        <button class="cal-arrow" id="cal3-next">›</button>
+      </div>
+      <div class="cal-days-header"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+      <div class="cal-grid" id="cal-grid3"></div>
+    </div>
+    <input class="modal-input" id="edit-tache-time" type="hidden">
+    <div class="time-wheel-wrap" id="tache-time-wrap">
+      <span class="time-wheel-label">⏰ Heure</span>
+      <div class="time-wheel">
+        <div class="wheel-col" id="tache-wheel-h"></div>
+        <span class="wheel-sep">:</span>
+        <div class="wheel-col" id="tache-wheel-m"></div>
+      </div>
+      <button class="time-none-btn" id="tache-time-none">Aucune</button>
+    </div>
+    <select class="modal-input" id="edit-tache-reminder" style="cursor:pointer;margin-top:0px">
+      <option value="">🔕 Pas de rappel</option>
+      <option value="60">🔔 1 heure avant l'échéance</option>
+      <option value="180">🔔 3 heures avant</option>
+      <option value="1440" selected>🔔 1 jour avant</option>
+      <option value="2880">🔔 2 jours avant</option>
+      <option value="10080">🔔 1 semaine avant</option>
+    </select>
+    <button class="modal-ok" id="btn-clear-deadline" style="background:var(--light);margin-top:10px;font-size:13px">Pas de date butoir</button>
+    <button class="modal-ok" id="btn-save-tache" style="background:var(--green);margin-top:6px">Enregistrer</button>
+    <button class="modal-cancel" data-close="edit-tache-modal">Annuler</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="event-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nouvel événement</div>
+    <input class="modal-input" id="ev-title" placeholder="Titre (ex: Écho 7ème mois)">
+    <div class="cal-wrap">
+      <div class="cal-nav">
+        <button class="cal-arrow" id="cal-prev">‹</button>
+        <div class="cal-month-label" id="cal-label"></div>
+        <button class="cal-arrow" id="cal-next">›</button>
+      </div>
+      <div class="cal-days-header"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div style="margin-top:10px">
+      <input type="hidden" id="ev-time">
+      <div class="time-wheel-wrap">
+        <span class="time-wheel-label">⏰ Heure</span>
+        <div class="time-wheel">
+          <div class="wheel-col" id="ev-wheel-h"></div>
+          <span class="wheel-sep">:</span>
+          <div class="wheel-col" id="ev-wheel-m"></div>
+        </div>
+        <button class="time-none-btn" id="ev-time-none">Aucune</button>
+      </div>
+      <input class="modal-input" id="ev-place" placeholder="Lieu – optionnel">
+      <select class="modal-input" id="ev-reminder" style="cursor:pointer">
+        <option value="">🔕 Pas de rappel</option>
+        <option value="10">🔔 10 minutes avant</option>
+        <option value="30">🔔 30 minutes avant</option>
+        <option value="60">🔔 1 heure avant</option>
+        <option value="180">🔔 3 heures avant</option>
+        <option value="1440" selected>🔔 1 jour avant</option>
+        <option value="2880">🔔 2 jours avant</option>
+        <option value="10080">🔔 1 semaine avant</option>
+      </select>
+      <select class="modal-input" id="ev-assignee" style="cursor:pointer;margin-top:9px">
+        <option value="both">👫 Valentin & Perrine</option>
+        <option value="V">👨 Valentin</option>
+        <option value="P">👩 Perrine</option>
+      </select>
+    </div>
+    <button class="modal-ok plum" id="btn-confirm-event">Ajouter</button>
+    <button class="modal-cancel" data-close="event-modal">Annuler</button>
+  </div>
+</div>
+
+<!-- ADMIN MODAL -->
+<div class="modal-overlay" id="admin-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nouvelle démarche</div>
+    <input class="modal-input" id="ad-title" placeholder="Titre (ex: Déclaration naissance)">
+    <input class="modal-input" id="ad-note" placeholder="Note / détail – optionnel">
+    <div class="modal-row">
+      <select class="modal-input" id="ad-status" style="flex:1;cursor:pointer">
+        <option value="todo">🟠 À faire</option>
+        <option value="wait">🔵 En cours</option>
+        <option value="ok">🟢 Fait</option>
+      </select>
+      <input class="modal-input" id="ad-icon" placeholder="Icône" style="flex:.6;text-align:center">
+    </div>
+    <div style="font-size:12px;color:var(--mid);font-weight:500;margin-bottom:8px;margin-top:4px;">Rappel — optionnel</div>
+    <div class="modal-row">
+      <input class="modal-input" id="ad-reminder-date" type="date" style="flex:1;margin-bottom:0">
+      <input class="modal-input" id="ad-reminder-time" type="time" style="flex:.8;margin-bottom:0" value="09:00">
+    </div>
+    <select class="modal-input" id="ad-reminder-delay" style="cursor:pointer;margin-top:9px">
+      <option value="">🔕 Pas de rappel supplémentaire</option>
+      <option value="1440">🔔 + rappel 1 jour avant</option>
+      <option value="2880">🔔 + rappel 2 jours avant</option>
+      <option value="10080">🔔 + rappel 1 semaine avant</option>
+    </select>
+    <select class="modal-input" id="ad-assignee" style="cursor:pointer;margin-top:9px">
+      <option value="both">👫 Valentin & Perrine</option>
+      <option value="V">👨 Valentin</option>
+      <option value="P">👩 Perrine</option>
+    </select>
+    <button class="modal-ok blue" id="btn-confirm-admin">Ajouter</button>
+    <button class="modal-cancel" data-close="admin-modal">Annuler</button>
+  </div>
+</div>
+
+<!-- EDIT EVENT MODAL -->
+<div class="modal-overlay" id="edit-event-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Modifier l'événement</div>
+    <input class="modal-input" id="edit-ev-title" placeholder="Titre">
+    <div class="cal-wrap">
+      <div class="cal-nav">
+        <button class="cal-arrow" id="cal2-prev">‹</button>
+        <div class="cal-month-label" id="cal-label2"></div>
+        <button class="cal-arrow" id="cal2-next">›</button>
+      </div>
+      <div class="cal-days-header"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+      <div class="cal-grid" id="cal-grid2"></div>
+    </div>
+    <div style="margin-top:10px">
+      <input type="hidden" id="edit-ev-time">
+      <div class="time-wheel-wrap">
+        <span class="time-wheel-label">⏰ Heure</span>
+        <div class="time-wheel">
+          <div class="wheel-col" id="edit-ev-wheel-h"></div>
+          <span class="wheel-sep">:</span>
+          <div class="wheel-col" id="edit-ev-wheel-m"></div>
+        </div>
+        <button class="time-none-btn" id="edit-ev-time-none">Aucune</button>
+      </div>
+      <input class="modal-input" id="edit-ev-place" placeholder="Lieu – optionnel">
+      <select class="modal-input" id="edit-ev-reminder" style="cursor:pointer">
+        <option value="">🔕 Pas de rappel</option>
+        <option value="10">🔔 10 minutes avant</option>
+        <option value="30">🔔 30 minutes avant</option>
+        <option value="60">🔔 1 heure avant</option>
+        <option value="180">🔔 3 heures avant</option>
+        <option value="1440">🔔 1 jour avant</option>
+        <option value="2880">🔔 2 jours avant</option>
+        <option value="10080">🔔 1 semaine avant</option>
+      </select>
+      <select class="modal-input" id="edit-ev-assignee" style="cursor:pointer;margin-top:9px">
+        <option value="both">👫 Valentin & Perrine</option>
+        <option value="V">👨 Valentin</option>
+        <option value="P">👩 Perrine</option>
+      </select>
+    </div>
+    <button class="modal-ok plum" id="btn-save-event">Enregistrer</button>
+    <button class="modal-cancel" data-close="edit-event-modal">Annuler</button>
+  </div>
+</div>
+
+<!-- EDIT ADMIN MODAL -->
+<div class="modal-overlay" id="edit-admin-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Modifier la démarche</div>
+    <input class="modal-input" id="edit-ad-title" placeholder="Titre">
+    <input class="modal-input" id="edit-ad-note" placeholder="Note / détail – optionnel">
+    <div class="modal-row">
+      <select class="modal-input" id="edit-ad-status" style="flex:1;cursor:pointer">
+        <option value="todo">🟠 À faire</option>
+        <option value="wait">🔵 En cours</option>
+        <option value="ok">🟢 Fait</option>
+      </select>
+      <input class="modal-input" id="edit-ad-icon" placeholder="Icône" style="flex:.6;text-align:center">
+    </div>
+    <select class="modal-input" id="edit-ad-assignee" style="cursor:pointer;margin-top:4px">
+      <option value="both">👫 Valentin & Perrine</option>
+      <option value="V">👨 Valentin</option>
+      <option value="P">👩 Perrine</option>
+    </select>
+    <div style="font-size:12px;color:var(--mid);font-weight:500;margin-bottom:8px;margin-top:9px;">Rappel — optionnel</div>
+    <div class="modal-row">
+      <input class="modal-input" id="edit-ad-reminder-date" type="date" style="flex:1;margin-bottom:0">
+      <input class="modal-input" id="edit-ad-reminder-time" type="time" style="flex:.8;margin-bottom:0" value="09:00">
+    </div>
+    <select class="modal-input" id="edit-ad-reminder-delay" style="cursor:pointer;margin-top:9px">
+      <option value="">🔕 Pas de rappel supplémentaire</option>
+      <option value="1440">🔔 + rappel 1 jour avant</option>
+      <option value="2880">🔔 + rappel 2 jours avant</option>
+      <option value="10080">🔔 + rappel 1 semaine avant</option>
+    </select>
+    <button class="modal-ok blue" id="btn-save-admin">Enregistrer</button>
+    <button class="modal-cancel" data-close="edit-admin-modal">Annuler</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, addDoc, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBUbmaoqsritSFadTop5bDeaDNkVBnXSV8",
+  authDomain: "nido-8ec2a.firebaseapp.com",
+  projectId: "nido-8ec2a",
+  storageBucket: "nido-8ec2a.firebasestorage.app",
+  messagingSenderId: "1067041162881",
+  appId: "1:1067041162881:web:4283234ae3db55eb322f80"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+
+// ── UTILS ────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+function x(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function empty(icon, text) { return `<div class="empty"><div class="empty-icon">${icon}</div><div class="empty-text">${text}</div></div>`; }
+
+// ── FIREBASE ─────────────────────────────────────────────
+async function save(key, data) {
+  try { await setDoc(doc(db, 'nido', key), { value: JSON.stringify(data) }); } catch(e) { console.error(e); }
+}
+
+// ── COLORS / STATE ───────────────────────────────────────
+const COLORS = { V:'#C4714A', M:'#4A7C5C' };
+const MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const MONTHS_SHORT = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc'];
+
+let user = { name:'', role:'V' };
+let selectedRole = 'V';
+let courses=[], taches=[], admin=[], events=[], feedbacks=[];
+let cf='all', tf='all';
+let uid = Date.now();
+
+const D = {
+  courses: [
+    {id:1,text:'Lait infantile 1er âge',done:false,tag:'bébé',r:'V',n:'Valentin'},
+    {id:2,text:'Couches taille 1',done:false,tag:'bébé',r:'M',n:'Maman'},
+    {id:3,text:'Oeufs',done:true,tag:'frigo',r:'M',n:'Maman'},
+  ],
+  taches: [
+    {id:1,text:'Préparer la valise de maternité',done:false,tag:'bébé',r:'V',n:'Valentin'},
+    {id:2,text:'Installer le siège auto',done:false,tag:'bébé',r:'M',n:'Maman'},
+    {id:3,text:'Rendez-vous pédiatre',done:false,tag:'médical',r:'M',n:'Maman'},
+  ],
+  admin: [
+    {id:1,title:'Déclaration naissance',note:'Dans les 5 jours suivant l\'accouchement',status:'todo',icon:'📜'},
+    {id:2,title:'CAF – allocation naissance',note:'Dossier après naissance',status:'wait',icon:'💶'},
+    {id:3,title:'Mutuelle – ajout ayant droit',note:'Contacter AXA',status:'todo',icon:'🏥'},
+    {id:4,title:'Congé paternité déclaré',note:'25 jours calendaires',status:'ok',icon:'✅'},
+  ],
+  events: [
+    {id:1,title:'Échographie 3ème trimestre',day:18,month:'Avr',mIdx:3,y:2025,time:'10h30',place:'Clinique Sainte-Marie'},
+    {id:2,title:'Cours préparation accouchement',day:25,month:'Avr',mIdx:3,y:2025,time:'18h00',place:'Maternité Belfort'},
+  ],
+  feedbacks: [
+    {id:1,text:'Ce serait top de pouvoir ajouter des photos dans les événements',r:'V',n:'Valentin',date:'Aujourd\'hui',tag:'idea'},
+  ]
+};
+
+// ── USER ─────────────────────────────────────────────────
+function updateHeader() {
+  const dot = $('hdr-dot');
+  dot.textContent = user.name[0]?.toUpperCase() || '?';
+  dot.style.background = COLORS[user.role] || '#999';
+  $('hdr-name').textContent = user.name;
+}
+
+function showMain() {
+  $('screen-onboarding').classList.remove('active');
+  $('screen-main').classList.add('active');
+  updateHeader();
+  loadHabits();
+  startListening();
+  setTimeout(rHome, 800);
+}
+
+function showOnboarding() {
+  localStorage.removeItem('nido-user');
+  $('screen-main').classList.remove('active');
+  $('screen-onboarding').classList.add('active');
+}
+
+$('btn-v').addEventListener('click', () => {
+  selectedRole = 'V';
+  $('btn-v').className = 'avatar-btn sel-v';
+  $('btn-m').className = 'avatar-btn';
+});
+$('btn-m').addEventListener('click', () => {
+  selectedRole = 'M';
+  $('btn-v').className = 'avatar-btn';
+  $('btn-m').className = 'avatar-btn sel-m';
+});
+$('btn-start').addEventListener('click', () => {
+  const n = $('onb-name').value.trim() || (selectedRole==='V' ? 'Valentin' : 'Maman');
+  user = { name:n, role:selectedRole };
+  try { localStorage.setItem('nido-user', JSON.stringify(user)); } catch(e) {}
+  showMain();
+});
+$('onb-name').addEventListener('keydown', e => { if(e.key==='Enter') $('btn-start').click(); });
+$('user-badge').addEventListener('click', showOnboarding);
+
+// Restore session — deferred to ensure all functions are defined first
+setTimeout(() => {
+  try {
+    const saved = localStorage.getItem('nido-user');
+    if (saved) { user = JSON.parse(saved); showMain(); }
+  } catch(e) {}
+}, 0);
+
+// ── FIREBASE LISTENERS ───────────────────────────────────
+function startListening() {
+  const map = {
+    'nido-courses':  { get: ()=>courses, set: v=>{ courses=v; rCourses(); }, def: D.courses },
+    'nido-taches':   { get: ()=>taches,  set: v=>{ taches=v;  rTaches();  }, def: D.taches  },
+    'nido-admin':    { get: ()=>admin,   set: v=>{ admin=v;   rAdmin();   }, def: D.admin   },
+    'nido-events':   { get: ()=>events,  set: v=>{ events=v;  rEvents();  }, def: D.events  },
+    'nido-feedbacks':{ get: ()=>feedbacks,set:v=>{ feedbacks=v;rFeedbacks();},def:D.feedbacks},
+    'nido-recipes':  { get: ()=>recipes, set: v=>{ recipes=v; }, def: [] },
+  };
+  Object.entries(map).forEach(([key, m]) => {
+    onSnapshot(doc(db, 'nido', key), snap => {
+      if (snap.exists()) { try { m.set(JSON.parse(snap.data().value)); } catch(e) { m.set(m.def); } }
+      else { m.set(m.def); }
+    });
+  });
+}
+
+// ── TABS ─────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => { t.className = 'tab ' + t.dataset.tab; });
+    $('section-' + tab).classList.add('active');
+    btn.classList.add('active', tab);
+    if (tab === 'home') rHome();
+  });
+});
+
+// ── ASSIGNEE ─────────────────────────────────────────────
+const ASSIGNEE_LABELS = { V:'👨 Valentin', P:'👩 Perrine', both:'👫 Tous les deux' };
+function assigneeBadge(a) {
+  if (!a || a==='both') return `<span class="assignee-badge assignee-both">👫</span>`;
+  if (a==='V') return `<span class="assignee-badge assignee-V">👨 Valentin</span>`;
+  if (a==='P') return `<span class="assignee-badge assignee-P">👩 Perrine</span>`;
+  return '';
+}
+
+// Stubs needed by rHome — full definitions come later
+function evIsUpcoming(e) {
+  const now = new Date(); now.setHours(0,0,0,0);
+  return new Date(e.y||2025, e.mIdx||0, e.day) >= now;
+}
+
+function getRayonEmoji(key) {
+  const map = {'fruits-legumes':'🥦','viandes-poissons':'🥩','frais':'🧀','boulangerie':'🥖','epicerie':'🥫','surgeles':'🧊','hygiene':'🧴','bebe':'🍼','maison':'🧹','autre':'🛒'};
+  return map[key]||'🛒';
+}
+
+// ── HOME DASHBOARD ────────────────────────────────────────
+function rHome() {
+  const now = new Date();
+  const greeting = now.getHours() < 12 ? 'Bonjour' : now.getHours() < 18 ? 'Bonjour' : 'Bonsoir';
+  $('home-title').textContent = `${greeting}, ${user.name} 👋`;
+  $('home-date').textContent = now.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+
+  const blocks = [];
+
+  // ── Bloc bébé / grossesse ──
+  const dueDate = localStorage.getItem('nido-due-date');
+  if (dueDate) {
+    const due = new Date(dueDate);
+    const diffDays = Math.round((due - now) / (1000*60*60*24));
+    const weeks = Math.floor(diffDays / 7);
+    if (diffDays > 0) {
+      blocks.push(`<div class="dash-bebe">
+        <div style="font-size:28px;margin-bottom:6px;">🤰</div>
+        <div class="dash-bebe-title">Bébé arrive dans ${diffDays} jours</div>
+        <div class="dash-bebe-sub">Soit environ ${weeks} semaine${weeks>1?'s':''} — courage !</div>
+      </div>`);
+    }
+  }
+
+  // ── Bloc événements à venir ──
+  const upcomingEvs = events
+    .filter(e => evIsUpcoming(e))
+    .sort((a,b) => new Date(a.y||2025,a.mIdx||0,a.day) - new Date(b.y||2025,b.mIdx||0,b.day))
+    .slice(0, 3);
+  blocks.push(`<div class="dash-block">
+    <div class="dash-block-header">
+      <div class="dash-block-title">📅 Prochains événements</div>
+      <span class="dash-block-count">${upcomingEvs.length}</span>
+    </div>
+    ${upcomingEvs.length ? upcomingEvs.map(e=>`
+      <div class="dash-item">
+        <div class="dash-item-dot" style="background:var(--plum)"></div>
+        <div class="dash-item-text">${x(e.title)}</div>
+        <div style="display:flex;align-items:center;gap:5px;">
+          <div class="dash-item-meta">${e.day} ${x(e.month)}${e.time?' · '+e.time:''}</div>
+          ${assigneeBadge(e.assignee)}
+        </div>
+      </div>`).join('') : `<div class="dash-empty">Aucun événement à venir</div>`}
+  </div>`);
+
+  // ── Bloc tâches urgentes ──
+  const urgentTaches = taches
+    .filter(t => !t.done && t.deadline)
+    .sort((a,b) => new Date(a.deadline) - new Date(b.deadline))
+    .slice(0, 3);
+  const overdue = taches.filter(t => !t.done && t.deadline && new Date(t.deadline) < now);
+  blocks.push(`<div class="dash-block">
+    <div class="dash-block-header">
+      <div class="dash-block-title">✅ Tâches prioritaires</div>
+      ${overdue.length ? `<span class="dash-block-count" style="background:#fdecea;color:#c62828;">🚨 ${overdue.length} en retard</span>` : `<span class="dash-block-count">${urgentTaches.length}</span>`}
+    </div>
+    ${urgentTaches.length ? urgentTaches.map(t=>{
+      const dl = new Date(t.deadline);
+      const diff = Math.round((dl-now)/(1000*60*60*24));
+      const late = diff < 0;
+      return `<div class="dash-item">
+        <div class="dash-item-dot" style="background:${late?'#c62828':diff<=2?'var(--amber)':'var(--green)'}"></div>
+        <div class="dash-item-text">${x(t.text)}</div>
+        <div style="display:flex;align-items:center;gap:5px;">
+          <div class="dash-item-meta" style="color:${late?'#c62828':'inherit'}">${late?'En retard':diff===0?'Aujourd\'hui':diff===1?'Demain':'Dans '+diff+'j'}</div>
+          ${assigneeBadge(t.assignee)}
+        </div>
+      </div>`;
+    }).join('') : `<div class="dash-empty">Aucune tâche urgente 🎉</div>`}
+  </div>`);
+
+  // ── Bloc courses restantes ──
+  const remaining = courses.filter(c => !c.done);
+  const done = courses.filter(c => c.done).length;
+  blocks.push(`<div class="dash-block">
+    <div class="dash-block-header">
+      <div class="dash-block-title">🛒 Courses</div>
+      <span class="dash-block-count">${remaining.length} restant${remaining.length>1?'s':''}</span>
+    </div>
+    ${remaining.length ? remaining.slice(0,4).map(c=>`
+      <div class="dash-item">
+        <div class="dash-item-dot" style="background:var(--terracotta)"></div>
+        <div class="dash-item-text">${x(c.text)}</div>
+        <div class="dash-item-meta">${getRayonEmoji(c.rayon||'autre')}</div>
+      </div>`).join('') + (remaining.length>4?`<div class="dash-empty" style="margin-top:6px;">+${remaining.length-4} autres articles</div>`:'')
+    : `<div class="dash-empty">Liste vide — tout est acheté ! 🎉</div>`}
+  </div>`);
+
+  // ── Bloc admin à faire ──
+  const adminTodo = admin.filter(a => a.status !== 'ok');
+  if (adminTodo.length) {
+    blocks.push(`<div class="dash-block">
+      <div class="dash-block-header">
+        <div class="dash-block-title">📋 Administratif</div>
+        <span class="dash-block-count">${adminTodo.length} en attente</span>
+      </div>
+      ${adminTodo.slice(0,3).map(a=>`
+        <div class="dash-item">
+          <div class="dash-item-dot" style="background:${a.status==='wait'?'var(--blue)':'var(--terracotta)'}"></div>
+          <div class="dash-item-text">${x(a.title)}</div>
+          <div class="dash-item-meta">${a.status==='wait'?'En cours':'À faire'}</div>
+        </div>`).join('')}
+    </div>`);
+  }
+
+  $('home-blocks').innerHTML = blocks.join('');
+
+  // Date d'accouchement — si pas définie, petit bloc pour la saisir
+  if (!dueDate) {
+    $('home-blocks').insertAdjacentHTML('afterbegin', `
+      <div class="dash-bebe" style="cursor:pointer;" id="dash-due-prompt">
+        <div style="font-size:24px;margin-bottom:6px;">🤰</div>
+        <div class="dash-bebe-title">Quand est la date prévue ?</div>
+        <div class="dash-bebe-sub">Tap pour définir la date d'accouchement</div>
+      </div>`);
+    $('dash-due-prompt')?.addEventListener('click', () => {
+      const d = prompt('Date prévue d\'accouchement (format JJ/MM/AAAA) :');
+      if (!d) return;
+      const parts = d.split('/');
+      if (parts.length===3) {
+        const date = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+        localStorage.setItem('nido-due-date', date.toISOString());
+        rHome();
+      }
+    });
+  }
+}
+
+// ── COURSES SUB-TABS ─────────────────────────────────────
+let coursesSubTab = 'list';
+document.querySelectorAll('#courses-subtabs .admin-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    coursesSubTab = btn.dataset.ctab;
+    document.querySelectorAll('#courses-subtabs .admin-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    $('courses-sub-list').style.display = coursesSubTab==='list' ? '' : 'none';
+    $('courses-sub-recipes').style.display = coursesSubTab==='recipes' ? '' : 'none';
+    $('courses-sub-habits').style.display = coursesSubTab==='habits' ? '' : 'none';
+    if (coursesSubTab==='recipes') renderCoursesRecipes();
+    if (coursesSubTab==='habits') renderCoursesHabits();
+  });
+});
+
+function renderCoursesRecipes() {
+  const list = $('courses-recipes-list');
+  if (!recipes.length) { list.innerHTML = empty('🍽','Aucune recette — créez-en une !'); return; }
+  list.innerHTML = recipes.map(r=>`
+    <div class="recipe-card">
+      <div class="recipe-card-header">
+        <div class="recipe-card-title">🍽 ${x(r.name)}</div>
+        <div style="display:flex;gap:5px;">
+          <button class="recipe-add-btn" data-action="add-recipe-inline" data-id="${r.id}">+ Liste</button>
+          <button class="recipe-add-btn" style="background:var(--blue-pale);border-color:var(--blue);color:var(--blue);" data-action="edit-recipe-inline" data-id="${r.id}">✏️</button>
+          <button class="recipe-ing-del" data-action="del-recipe-inline" data-id="${r.id}">🗑</button>
+        </div>
+      </div>
+      <div class="recipe-card-ings">${r.ingredients.map(i=>`${i.qty?i.qty+' ':''}${i.unit?i.unit+' ':''}${i.name}`).join(' · ')}</div>
+    </div>`).join('');
+}
+
+$('courses-sub-recipes').addEventListener('click', async e => {
+  const el = e.target.closest('[data-action]'); if(!el) return;
+  const id = parseInt(el.dataset.id);
+  if (el.dataset.action==='del-recipe-inline') { recipes=recipes.filter(r=>r.id!==id); await save('nido-recipes',recipes); renderCoursesRecipes(); }
+  if (el.dataset.action==='edit-recipe-inline') { openEditRecipe(id); }
+  if (el.dataset.action==='add-recipe-inline') {
+    const recipe=recipes.find(r=>r.id===id); if(!recipe) return;
+    for (const ing of recipe.ingredients) {
+      const rayon=await detectRayonAI(ing.name);
+      courses.unshift({id:uid++,text:ing.name,done:false,rayon,r:user.role,n:user.name,qty:ing.qty,unit:ing.unit});
+      addToHabits(ing.name, rayon);
+    }
+    await save('nido-courses',courses);
+    // Switch to list
+    coursesSubTab='list';
+    document.querySelectorAll('#courses-subtabs .admin-tab').forEach(b=>b.classList.remove('active'));
+    $('ctab-list').classList.add('active');
+    $('courses-sub-list').style.display=''; $('courses-sub-recipes').style.display='none'; $('courses-sub-habits').style.display='none';
+  }
+});
+
+$('btn-open-add-recipe2').addEventListener('click', () => {
+  newRecipeIngs=[];
+  $('recipe-name').value=''; $('recipe-ing-name').value=''; $('recipe-ing-qty').value='';
+  renderNewRecipeIngs();
+  openModal('add-recipe-modal');
+});
+
+function renderCoursesHabits() {
+  const chips = $('courses-habits-chips');
+  const habits = getHabits();
+  if (!habits.length) { chips.innerHTML = empty('⭐','Pas encore d\'habitudes — ajoutez des articles !'); return; }
+  chips.innerHTML = `<div class="habit-chips">${habits.map(h=>`<button class="habit-chip" data-text="${x(h.text)}" data-rayon="${h.rayon||'autre'}">${x(h.text)}</button>`).join('')}</div>`;
+}
+
+$('courses-sub-habits').addEventListener('click', async e => {
+  const chip=e.target.closest('.habit-chip'); if(!chip) return;
+  const text=chip.dataset.text; const rayon=chip.dataset.rayon||'autre';
+  if (courses.find(c=>!c.done&&c.text.toLowerCase()===text.toLowerCase())) {
+    chip.textContent='✓ Déjà dans la liste'; chip.style.opacity='0.5'; return;
+  }
+  courses.unshift({id:uid++,text,done:false,rayon,r:user.role,n:user.name,qty:'',unit:''});
+  await save('nido-courses',courses);
+  chip.style.background='var(--green-pale)'; chip.style.borderColor='var(--green)'; chip.style.color='var(--green)';
+  chip.textContent='✓ '+text;
+});
+const RAYONS = [
+  { key:'fruits-legumes', name:'Fruits & Légumes', emoji:'🥦', order:1, keywords:['pomme','poire','banane','orange','citron','fraise','tomate','carotte','salade','concombre','courgette','poivron','oignon','ail','pomme de terre','champignon','raisin','melon','pastèque','ananas','mangue','avocat','brocoli','chou','épinard','poireau','radis','betterave','céleri','fenouil','asperge','artichaut','petits pois','haricot','maïs','aubergine','navet','persil','basilic','coriandre'] },
+  { key:'viandes-poissons', name:'Viandes & Poissons', emoji:'🥩', order:2, keywords:['poulet','boeuf','porc','veau','agneau','steak','côte','filet','escalope','jambon','lardons','saucisse','merguez','chipolata','bacon','dinde','canard','lapin','saumon','thon','cabillaud','crevette','moule','sardine','truite','sole','colin'] },
+  { key:'frais', name:'Produits Frais', emoji:'🧀', order:3, keywords:['lait','crème','beurre','fromage','yaourt','oeuf','oeufs','mascarpone','ricotta','mozzarella','camembert','brie','emmental','gruyère','parmesan','chèvre','roquefort','crème fraîche','kéfir'] },
+  { key:'boulangerie', name:'Boulangerie', emoji:'🥖', order:4, keywords:['pain','baguette','croissant','brioche','toast','pain de mie','crackers','biscottes','farine','levure','viennoiserie'] },
+  { key:'epicerie', name:'Épicerie', emoji:'🥫', order:5, keywords:['pâtes','riz','semoule','lentille','quinoa','conserve','sauce','ketchup','moutarde','mayonnaise','huile','vinaigre','sel','poivre','sucre','confiture','miel','céréales','granola','biscuit','chocolat','café','thé','eau','soda','bière','vin','compote','sirop','bouillon'] },
+  { key:'surgeles', name:'Surgelés', emoji:'🧊', order:6, keywords:['surgelé','congelé','glace','pizza','frites','nuggets','poisson pané'] },
+  { key:'hygiene', name:'Hygiène & Beauté', emoji:'🧴', order:7, keywords:['shampoing','gel douche','savon','déodorant','dentifrice','brosse à dents','rasoir','crème','lotion','coton','maquillage','parfum','serviette hygiénique','tampon','lingette adulte','papier toilette','coton-tige','démaquillant'] },
+  { key:'bebe', name:'Bébé', emoji:'🍼', order:8, keywords:['couche','lait infantile','premier âge','deuxième âge','petits pots','compote bébé','lingette bébé','crème bébé','biberon','tétine','sucette','sérum physiologique'] },
+  { key:'maison', name:'Maison & Entretien', emoji:'🧹', order:9, keywords:['lessive','liquide vaisselle','éponge','produit ménager','sac poubelle','essuie-tout','film alimentaire','ampoule','pile','bougie','désinfectant'] },
+  { key:'autre', name:'Autre', emoji:'🛒', order:10, keywords:[] },
+];
+
+function detectRayonLocal(text) {
+  const t = text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  for (const r of RAYONS) {
+    if (r.key==='autre') continue;
+    if (r.keywords.some(k => t.includes(k.normalize('NFD').replace(/[\u0300-\u036f]/g,'')))) return r.key;
+  }
+  return null;
+}
+
+async function detectRayonAI(text) {
+  const local = detectRayonLocal(text);
+  if (local) return local;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:20,
+        messages:[{role:'user', content:`Rayon supermarché pour "${text}" ? Réponds uniquement: fruits-legumes, viandes-poissons, frais, boulangerie, epicerie, surgeles, hygiene, bebe, maison, ou autre`}]
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text?.trim().toLowerCase().split(/\s/)[0] || 'autre';
+    return RAYONS.map(r=>r.key).includes(reply) ? reply : 'autre';
+  } catch(e) { return 'autre'; }
+}
+
+function getRayon(key) { return RAYONS.find(r=>r.key===key) || RAYONS[RAYONS.length-1]; }
+
+// ── HABITS TRACKING ───────────────────────────────────────
+let habits = {};
+
+function loadHabits() {
+  try { habits = JSON.parse(localStorage.getItem('nido-habits')||'{}'); } catch(e) { habits={}; }
+}
+
+function addToHabits(text, rayon) {
+  const k = text.toLowerCase().trim();
+  if (!k) return;
+  if (!habits[k]) habits[k] = { text, rayon: rayon||'autre', count: 0 };
+  habits[k].count++;
+  habits[k].rayon = rayon || habits[k].rayon;
+  try { localStorage.setItem('nido-habits', JSON.stringify(habits)); } catch(e) {}
+}
+
+function getHabits() {
+  return Object.values(habits).sort((a,b)=>b.count-a.count).slice(0,40);
+}
+
+// ── COURSES ──────────────────────────────────────────────
+function rCourses() {
+  const done = courses.filter(c=>c.done).length;
+  const pct = courses.length ? Math.round(done/courses.length*100) : 0;
+  $('courses-bar').style.width = pct+'%';
+  $('courses-lbl').textContent = `${done}/${courses.length} articles cochés`;
+  $('btn-clear-done').style.display = done > 0 ? 'flex' : 'none';
+  const list = $('courses-list');
+  if (!courses.length) { list.innerHTML = empty('🛒','Rien ici !'); return; }
+
+  // Group by rayon
+  const groups = {};
+  courses.forEach(c => { const k=c.rayon||'autre'; if(!groups[k]) groups[k]=[]; groups[k].push(c); });
+  const sortedKeys = Object.keys(groups).sort((a,b)=>getRayon(a).order - getRayon(b).order);
+
+  list.innerHTML = sortedKeys.map(key => {
+    const rayon = getRayon(key);
+    const items = groups[key];
+    const remaining = items.filter(i=>!i.done).length;
+    return `<div class="rayon-group">
+      <div class="rayon-header">
+        <span class="rayon-emoji">${rayon.emoji}</span>
+        <span class="rayon-name">${rayon.name}</span>
+        <span class="rayon-count">${remaining} restant${remaining>1?'s':''}</span>
+      </div>
+      ${items.map(c=>`
+        <div class="item ${c.done?'done':''} courses" style="margin-bottom:6px;">
+          <div class="item-check" data-action="toggle-course" data-id="${c.id}">${c.done?'✓':''}</div>
+          <span class="item-text">${x(c.text)}</span>
+          ${c.qty ? `<span class="item-qty">${x(String(c.qty))}${c.unit?' '+x(c.unit):''}</span>` : ''}
+          <div class="item-author" style="background:${COLORS[c.r]||'#999'}">${c.n?c.n[0]:'?'}</div>
+          <button class="item-edit-btn" data-action="edit-course" data-id="${c.id}">✏️</button>
+          <button class="item-delete" data-action="del-course" data-id="${c.id}">×</button>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+$('btn-add-course').addEventListener('click', addCourse);
+$('ci').addEventListener('keydown', e => { if(e.key==='Enter') addCourse(); });
+async function addCourse() {
+  const inp=$('ci'), text=inp.value.trim(); if(!text) return;
+  const tempId = uid++;
+  courses.unshift({id:tempId, text, done:false, rayon:'autre', r:user.role, n:user.name, qty:'', unit:''});
+  inp.value=''; rCourses(); await save('nido-courses', courses);
+  const rayon = await detectRayonAI(text);
+  const c = courses.find(i=>i.id===tempId);
+  if (c) { c.rayon = rayon; await save('nido-courses', courses); }
+  addToHabits(text, rayon);
+}
+
+$('btn-clear-done').addEventListener('click', () => {
+  const count = courses.filter(c=>c.done).length;
+  if (!count) return;
+  if (confirm(`Effacer les ${count} article${count>1?'s':''} rayé${count>1?'s':''} ? Cette action est irréversible.`)) {
+    courses = courses.filter(c=>!c.done);
+    save('nido-courses', courses);
+  }
+});
+
+let editCourseId = null;
+$('courses-list').addEventListener('click', async e => {
+  const el = e.target.closest('[data-action]'); if(!el) return;
+  const id = parseInt(el.dataset.id);
+  if (el.dataset.action==='toggle-course') { const c=courses.find(i=>i.id===id); if(c){c.done=!c.done; await save('nido-courses',courses);} }
+  if (el.dataset.action==='del-course') { courses=courses.filter(i=>i.id!==id); await save('nido-courses',courses); }
+  if (el.dataset.action==='edit-course') {
+    const c=courses.find(i=>i.id===id); if(!c) return;
+    editCourseId=id;
+    $('edit-course-name').value=c.text;
+    $('edit-course-qty').value=c.qty||'';
+    $('edit-course-unit').value=c.unit||'';
+    const r=getRayon(c.rayon||'autre');
+    $('edit-course-rayon-label').textContent=r.emoji+' '+r.name;
+    openModal('edit-course-modal');
+  }
+});
+$('btn-save-course').addEventListener('click', async () => {
+  const name=$('edit-course-name').value.trim(); if(!name) return;
+  const c=courses.find(i=>i.id===editCourseId); if(!c) return;
+  const oldText=c.text; c.text=name; c.qty=$('edit-course-qty').value; c.unit=$('edit-course-unit').value;
+  closeModal('edit-course-modal'); await save('nido-courses',courses);
+  if (name!==oldText) { const rayon=await detectRayonAI(name); c.rayon=rayon; await save('nido-courses',courses); }
+});
+
+// ── TACHES ───────────────────────────────────────────────
+const tmap = {bébé:'🍼',maison:'🏠',médical:'🏥',perso:'👤'};
+let tacheTab = 'active';
+
+function deadlineBadge(t) {
+  if (!t.deadline) return '';
+  const now = new Date(); now.setHours(0,0,0,0);
+  const dl = new Date(t.deadline); dl.setHours(0,0,0,0);
+  const diff = Math.round((dl-now)/(1000*60*60*24));
+  if (diff < 0 && !t.done) return `<span class="urgent-badge">🚨 Urgent</span>`;
+  const label = diff===0 ? `Aujourd'hui` : diff===1 ? `Demain` : `Dans ${diff}j`;
+  const cls = diff <= 2 ? 'deadline-soon' : 'deadline-ok';
+  return `<span class="deadline-badge ${cls}">${label}</span>`;
+}
+
+function rTaches() {
+  const filtered = tacheTab==='done'
+    ? taches.filter(t=>t.done)
+    : taches.filter(t=>!t.done);
+  const done = taches.filter(t=>t.done).length;
+  const pct = taches.length ? Math.round(done/taches.length*100) : 0;
+  $('taches-bar').style.width = pct+'%';
+  $('taches-lbl').textContent = `${done}/${taches.length} tâches complétées`;
+  const list = $('taches-list');
+  if (!filtered.length) {
+    list.innerHTML = empty('✅', tacheTab==='done'?'Aucune tâche terminée':'Tout est fait !');
+    return;
+  }
+  const sorted = [...filtered].sort((a,b) => {
+    if (a.deadline && b.deadline) return new Date(a.deadline) - new Date(b.deadline);
+    if (a.deadline) return -1; if (b.deadline) return 1;
+    return 0;
+  });
+  list.innerHTML = sorted.map(t=>`
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-title">
+          <div class="admin-icon-box" style="cursor:pointer;" data-action="toggle-tache" data-id="${t.id}">
+            ${t.done ? '✅' : (tmap[t.tag]||'📌')}
+          </div>
+          <span style="${t.done?'text-decoration:line-through;opacity:0.55':''};">${x(t.text)}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
+          ${assigneeBadge(t.assignee)}
+          ${deadlineBadge(t)}
+          <span class="admin-status ${t.done?'s-ok':!t.deadline?'s-todo':'s-wait'}">${t.done?'Fait':!t.deadline?'À faire':'En cours'}</span>
+        </div>
+      </div>
+      ${t.deadline&&!t.done?`<div class="admin-note">📅 ${new Date(t.deadline).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}${t.time?' à '+t.time:''}</div>`:''}
+      ${t.reminder&&t.deadline&&!t.done?`<div style="font-size:11px;color:var(--blue);margin-top:4px;">🔔 Rappel ${parseInt(t.reminder)>=1440?Math.round(parseInt(t.reminder)/1440)+'j':t.reminder+'min'} avant</div>`:''}
+      <div class="card-actions">
+        <button class="card-btn edit-blue" data-action="edit-tache" data-id="${t.id}">✏️ Modifier</button>
+        <button class="card-btn del" data-action="del-tache" data-id="${t.id}">🗑 Supprimer</button>
+        <div class="admin-icon-box" style="background:${COLORS[t.r]||'#999'};color:white;font-size:11px;font-weight:600;cursor:default;">${t.n?t.n[0]:'?'}</div>
+      </div>
+    </div>`).join('');
+}
+
+$('tache-tab-active').addEventListener('click', () => {
+  tacheTab='active';
+  $('tache-tab-active').classList.add('active');
+  $('tache-tab-done').classList.remove('active','done-tab');
+  $('tache-tab-done').classList.add('done-tab');
+  rTaches();
+});
+$('tache-tab-done').addEventListener('click', () => {
+  tacheTab='done';
+  $('tache-tab-done').classList.add('active','done-tab');
+  $('tache-tab-active').classList.remove('active');
+  rTaches();
+});
+
+$('btn-add-tache-open').addEventListener('click', () => openModal('add-tache-modal'));
+$('btn-add-tache').addEventListener('click', addTache);
+$('ti').addEventListener('keydown', e => { if(e.key==='Enter') addTache(); });
+async function addTache() {
+  const inp=$('ti'), text=inp.value.trim(); if(!text) return;
+  const tag = $('ti-tag')?.value || 'perso';
+  const assignee = $('ti-assignee')?.value || 'both';
+  taches.unshift({id:uid++,text,done:false,tag,assignee,r:user.role,n:user.name,deadline:null});
+  inp.value='';
+  closeModal('add-tache-modal');
+  await save('nido-taches',taches);
+}
+
+// Calendar 3 for tache deadline
+let cal3Y, cal3M, cal3Sel=null;
+function initCal3(sel) {
+  const base = sel ? new Date(sel) : new Date();
+  cal3Y=base.getFullYear(); cal3M=base.getMonth();
+  cal3Sel = sel ? {d:base.getDate(),m:base.getMonth(),y:base.getFullYear()} : null;
+  renderCal3();
+}
+function renderCal3() { buildCal('cal-grid3','cal-label3',cal3Y,cal3M,cal3Sel, d=>{cal3Sel={d,m:cal3M,y:cal3Y};renderCal3();}); }
+$('cal3-prev').addEventListener('click',()=>{ cal3M--; if(cal3M<0){cal3M=11;cal3Y--;} renderCal3(); });
+$('cal3-next').addEventListener('click',()=>{ cal3M++; if(cal3M>11){cal3M=0;cal3Y++;} renderCal3(); });
+
+let editTacheId=null;
+$('taches-list').addEventListener('click', async e => {
+  const el = e.target.closest('[data-action]'); if(!el) return;
+  const id = parseInt(el.dataset.id);
+  if (el.dataset.action==='toggle-tache') { const t=taches.find(i=>i.id===id); if(t){t.done=!t.done; await save('nido-taches',taches);} }
+  if (el.dataset.action==='del-tache') { taches=taches.filter(i=>i.id!==id); await save('nido-taches',taches); }
+  if (el.dataset.action==='edit-tache') {
+    const t=taches.find(i=>i.id===id); if(!t) return;
+    editTacheId=id;
+    $('edit-tache-text').value=t.text;
+    $('edit-tache-tag').value=t.tag||'perso';
+    $('edit-tache-assignee').value=t.assignee||'both';
+    $('edit-tache-reminder').value=t.reminder||'1440';
+    initCal3(t.deadline||null);
+    setTimeout(()=>initTacheWheel(t.time||''), 50);
+    openModal('edit-tache-modal');
+  }
+});
+$('btn-save-tache').addEventListener('click', async () => {
+  const text=$('edit-tache-text').value.trim(); if(!text) return;
+  const t=taches.find(i=>i.id===editTacheId); if(!t) return;
+  t.text=text; t.tag=$('edit-tache-tag').value;
+  t.assignee=$('edit-tache-assignee').value||'both';
+  t.deadline = cal3Sel ? new Date(cal3Sel.y,cal3Sel.m,cal3Sel.d).toISOString() : null;
+  t.reminder = $('edit-tache-reminder').value;
+  t.time = getWheelTime(tacheTime, tacheTimeActive);
+  closeModal('edit-tache-modal'); await save('nido-taches',taches);
+  if (gcalToken && t.deadline) {
+    try {
+      const calId = localStorage.getItem('nido-gcal-calid') || 'primary';
+      const dl = new Date(t.deadline);
+      const pad = n=>String(n).padStart(2,'0');
+      const timeParts = t.time ? t.time.replace('h',':').split(':') : ['09','00'];
+      const h = parseInt(timeParts[0]); const m = parseInt(timeParts[1]||'0');
+      const dateStr = `${dl.getFullYear()}-${pad(dl.getMonth()+1)}-${pad(dl.getDate())}`;
+      const startStr = `${dateStr}T${pad(h)}:${pad(m)}:00`;
+      const endStr   = `${dateStr}T${pad(h<23?h+1:23)}:${pad(m)}:00`;
+      const reminders = t.reminder
+        ? { useDefault:false, overrides:[{method:'popup',minutes:parseInt(t.reminder)},{method:'email',minutes:parseInt(t.reminder)}] }
+        : { useDefault:false, overrides:[{method:'popup',minutes:0}] };
+      const body = { summary:`✅ ${t.text}`, start:{dateTime:startStr,timeZone:'Europe/Paris'}, end:{dateTime:endStr,timeZone:'Europe/Paris'}, reminders };
+      let res;
+      if (t.gcalId) {
+        // Update existing event
+        res = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events/${t.gcalId}`, {
+          method:'PATCH',
+          headers:{Authorization:`Bearer ${gcalToken}`,'Content-Type':'application/json'},
+          body: JSON.stringify(body)
+        });
+      } else {
+        // Create new event
+        res = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events`, {
+          method:'POST',
+          headers:{Authorization:`Bearer ${gcalToken}`,'Content-Type':'application/json'},
+          body: JSON.stringify(body)
+        });
+        if (res.ok) {
+          const ge = await res.json();
+          t.gcalId = ge.id;
+          await save('nido-taches', taches);
+        }
+      }
+    } catch(e) { console.warn('gcal tache push failed', e); }
+  }
+});
+$('btn-clear-deadline').addEventListener('click', async () => {
+  cal3Sel=null; renderCal3();
+  const t=taches.find(i=>i.id===editTacheId); if(t){t.deadline=null; await save('nido-taches',taches);}
+  closeModal('edit-tache-modal');
+});
+
+// ── ADMIN ────────────────────────────────────────────────
+const si = {ok:['Fait','s-ok'],todo:['À faire','s-todo'],wait:['En cours','s-wait']};
+let adminTab = 'active'; // 'active' or 'done'
+
+function rAdmin() {
+  const list = $('admin-list');
+  const filtered = adminTab==='done' ? admin.filter(a=>a.status==='ok') : admin.filter(a=>a.status!=='ok');
+  if(!filtered.length){
+    list.innerHTML=empty('📋', adminTab==='done'?'Aucune démarche terminée':'Aucune démarche en cours');
+    return;
+  }
+  list.innerHTML = filtered.map(a=>`
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-title"><div class="admin-icon-box">${a.icon||'📄'}</div>${x(a.title)}</div>
+        <div style="display:flex;align-items:center;gap:5px;">
+          ${assigneeBadge(a.assignee)}
+          <span class="admin-status ${si[a.status][1]}">${si[a.status][0]}</span>
+        </div>
+      </div>
+      ${a.note?`<div class="admin-note">${x(a.note)}</div>`:''}
+      ${a.reminderDate?`<div style="font-size:11px;color:var(--blue);margin-top:5px;">🔔 ${a.reminderDate} à ${a.reminderTime||'09:00'}</div>`:''}
+      <div class="card-actions">
+        <button class="card-btn edit-blue" data-action="edit-admin" data-id="${a.id}">✏️ Modifier</button>
+        <button class="card-btn del" data-action="del-admin" data-id="${a.id}">🗑 Supprimer</button>
+      </div>
+    </div>`).join('');
+}
+
+$('admin-tab-active').addEventListener('click', () => {
+  adminTab='active';
+  $('admin-tab-active').classList.add('active'); $('admin-tab-done').classList.remove('active','done-tab');
+  $('admin-tab-done').classList.add('done-tab');
+  rAdmin();
+});
+$('admin-tab-done').addEventListener('click', () => {
+  adminTab='done';
+  $('admin-tab-done').classList.add('active','done-tab'); $('admin-tab-active').classList.remove('active');
+  rAdmin();
+});
+$('btn-open-admin').addEventListener('click', () => openModal('admin-modal'));
+$('btn-confirm-admin').addEventListener('click', async () => {
+  const title=$('ad-title').value.trim(); if(!title) return;
+  const reminderDate = $('ad-reminder-date').value;
+  const reminderTime = $('ad-reminder-time').value || '09:00';
+  const reminderDelay = $('ad-reminder-delay').value;
+  const newAdmin = {id:uid++, title, note:$('ad-note').value.trim(), status:$('ad-status').value, icon:$('ad-icon').value.trim()||'📄', reminderDate, reminderTime, reminderDelay, assignee:$('ad-assignee').value||'both'};
+  admin.unshift(newAdmin);
+  closeModal('admin-modal');
+  ['ad-title','ad-note','ad-icon','ad-reminder-date'].forEach(id=>$(id).value='');
+  $('ad-reminder-delay').value='';
+  await save('nido-admin', admin);
+  // Push to Google Calendar as a reminder event if date set
+  if (gcalToken && reminderDate) {
+    try {
+      const calId = localStorage.getItem('nido-gcal-calid') || 'primary';
+      const pad = n=>String(n).padStart(2,'0');
+      const [h,m] = reminderTime.split(':');
+      const startStr = `${reminderDate}T${pad(parseInt(h))}:${pad(parseInt(m))}:00`;
+      const endH = parseInt(h)<23 ? parseInt(h)+1 : 23;
+      const endStr = `${reminderDate}T${pad(endH)}:${pad(parseInt(m))}:00`;
+      const reminders = reminderDelay
+        ? { useDefault:false, overrides:[{method:'popup',minutes:parseInt(reminderDelay)},{method:'email',minutes:parseInt(reminderDelay)}] }
+        : { useDefault:false, overrides:[{method:'popup',minutes:0}] };
+      await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events`, {
+        method:'POST',
+        headers:{Authorization:`Bearer ${gcalToken}`,'Content-Type':'application/json'},
+        body: JSON.stringify({ summary:`📋 ${title}`, start:{dateTime:startStr,timeZone:'Europe/Paris'}, end:{dateTime:endStr,timeZone:'Europe/Paris'}, reminders })
+      });
+    } catch(e) { console.warn('gcal admin push failed', e); }
+  }
+});
+let editAdminId=null;
+$('admin-list').addEventListener('click', e => {
+  const el=e.target.closest('[data-action]'); if(!el) return;
+  const id=parseInt(el.dataset.id);
+  if(el.dataset.action==='del-admin'){ admin=admin.filter(i=>i.id!==id); save('nido-admin',admin); }
+  if(el.dataset.action==='edit-admin'){
+    const a=admin.find(i=>i.id===id); if(!a) return;
+    editAdminId=id;
+    $('edit-ad-title').value=a.title; $('edit-ad-note').value=a.note||'';
+    $('edit-ad-status').value=a.status; $('edit-ad-icon').value=a.icon||'';
+    $('edit-ad-assignee').value=a.assignee||'both';
+    $('edit-ad-reminder-date').value=a.reminderDate||'';
+    $('edit-ad-reminder-time').value=a.reminderTime||'09:00';
+    $('edit-ad-reminder-delay').value=a.reminderDelay||'';
+    openModal('edit-admin-modal');
+  }
+});
+$('btn-save-admin').addEventListener('click', async () => {
+  const title=$('edit-ad-title').value.trim(); if(!title) return;
+  const a=admin.find(i=>i.id===editAdminId); if(!a) return;
+  a.title=title; a.note=$('edit-ad-note').value.trim();
+  a.status=$('edit-ad-status').value; a.icon=$('edit-ad-icon').value.trim()||'📄';
+  a.assignee=$('edit-ad-assignee').value||'both';
+  a.reminderDate=$('edit-ad-reminder-date').value;
+  a.reminderTime=$('edit-ad-reminder-time').value||'09:00';
+  a.reminderDelay=$('edit-ad-reminder-delay').value;
+  closeModal('edit-admin-modal'); await save('nido-admin',admin);
+});
+
+// ── CALENDAR ─────────────────────────────────────────────
+let calY, calM, calSel=null;
+let cal2Y, cal2M, cal2Sel=null;
+
+// ── TIME WHEEL ────────────────────────────────────────────
+function buildWheel(colId, values, initialVal, onChange) {
+  const col = $(colId); if(!col) return;
+  col.innerHTML = '';
+  // Add padding items top/bottom for centering
+  ['',''].forEach(()=>{ const pad=document.createElement('div'); pad.className='wheel-item'; pad.style.minHeight='40px'; col.appendChild(pad); });
+  values.forEach(v => {
+    const el = document.createElement('div');
+    el.className = 'wheel-item' + (v===initialVal?' selected':'');
+    el.textContent = v;
+    el.dataset.val = v;
+    col.appendChild(el);
+  });
+  ['',''].forEach(()=>{ const pad=document.createElement('div'); pad.className='wheel-item'; pad.style.minHeight='40px'; col.appendChild(pad); });
+
+  // Scroll to initial
+  const items = col.querySelectorAll('.wheel-item[data-val]');
+  const idx = values.indexOf(initialVal);
+  if (idx>=0) col.scrollTop = idx * 40;
+
+  col.addEventListener('scroll', () => {
+    const idx = Math.round(col.scrollTop / 40);
+    const val = values[Math.max(0,Math.min(idx,values.length-1))];
+    col.querySelectorAll('.wheel-item[data-val]').forEach(el => el.classList.toggle('selected', el.dataset.val===val));
+    onChange(val);
+  });
+}
+
+const HOURS = Array.from({length:24}, (_,i)=>String(i).padStart(2,'0'));
+const MINS  = Array.from({length:12}, (_,i)=>String(i*5).padStart(2,'0'));
+
+function parseTime(t) {
+  if (!t) return {h:'09',m:'00'};
+  const parts = t.replace('h',':').split(':');
+  return {h:String(parseInt(parts[0]||'9')).padStart(2,'0'), m:String(parseInt(parts[1]||'0')).padStart(2,'0')};
+}
+
+// State for each wheel
+let evTime={h:'',m:''}, editEvTime={h:'',m:''}, tacheTime={h:'',m:''};
+let evTimeActive=false, editEvTimeActive=false, tacheTimeActive=false;
+
+function initWheel(prefix, currentVal, stateObj, activeRef, setActive) {
+  const t = parseTime(currentVal);
+  stateObj.h = currentVal ? t.h : '';
+  stateObj.m = currentVal ? t.m : '00';
+  setActive(!!currentVal);
+  buildWheel(prefix+'-wheel-h', HOURS, stateObj.h||'09', v=>{ stateObj.h=v; setActive(true); });
+  buildWheel(prefix+'-wheel-m', MINS, stateObj.m||'00', v=>{ stateObj.m=v; setActive(true); });
+}
+
+function getWheelTime(stateObj, active) {
+  if (!active) return '';
+  // Round minutes to nearest 5
+  const m = stateObj.m || '00';
+  return `${stateObj.h||'09'}h${m}`;
+}
+
+function initEventWheel(currentVal) {
+  initWheel('ev', currentVal, evTime, null, v=>{ evTimeActive=v; });
+}
+function initEditEvWheel(currentVal) {
+  initWheel('edit-ev', currentVal, editEvTime, null, v=>{ editEvTimeActive=v; });
+}
+function initTacheWheel(currentVal) {
+  initWheel('tache', currentVal, tacheTime, null, v=>{ tacheTimeActive=v; });
+}
+
+$('ev-time-none').addEventListener('click', ()=>{ evTimeActive=false; });
+$('edit-ev-time-none').addEventListener('click', ()=>{ editEvTimeActive=false; });
+$('tache-time-none').addEventListener('click', ()=>{ tacheTimeActive=false; });
+
+function buildCal(gridId, labelId, year, month, sel, onSelect) {
+  const first = new Date(year,month,1).getDay();
+  const offset = first===0 ? 6 : first-1;
+  const dim = new Date(year,month+1,0).getDate();
+  const today = new Date();
+  let html='';
+  for(let i=0;i<offset;i++) html+=`<button class="cal-day empty-day" disabled></button>`;
+  for(let d=1;d<=dim;d++){
+    const isT=d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear();
+    const isS=sel&&sel.d===d&&sel.m===month&&sel.y===year;
+    html+=`<button class="cal-day${isT?' today':''}${isS?' selected':''}" data-day="${d}">${d}</button>`;
+  }
+  $(gridId).innerHTML=html;
+  $(gridId).addEventListener('click', e=>{
+    const btn=e.target.closest('[data-day]'); if(!btn) return;
+    onSelect(parseInt(btn.dataset.day));
+  }, {once:true});
+  // Re-add listener after rebuild by re-calling
+}
+
+function initCal() {
+  const now=new Date(); calY=now.getFullYear(); calM=now.getMonth(); calSel=null;
+  renderCal();
+}
+function renderCal() { buildCal('cal-grid','cal-label',calY,calM,calSel, d=>{ calSel={d,m:calM,y:calY}; renderCal(); }); }
+$('cal-prev').addEventListener('click',()=>{ calM--; if(calM<0){calM=11;calY--;} renderCal(); });
+$('cal-next').addEventListener('click',()=>{ calM++; if(calM>11){calM=0;calY++;} renderCal(); });
+
+function initCal2(sel) {
+  const base=sel?new Date(sel.y,sel.m,sel.d):new Date();
+  cal2Y=base.getFullYear(); cal2M=base.getMonth(); cal2Sel=sel||null;
+  renderCal2();
+}
+function renderCal2() { buildCal('cal-grid2','cal-label2',cal2Y,cal2M,cal2Sel, d=>{ cal2Sel={d,m:cal2M,y:cal2Y}; renderCal2(); }); }
+$('cal2-prev').addEventListener('click',()=>{ cal2M--; if(cal2M<0){cal2M=11;cal2Y--;} renderCal2(); });
+$('cal2-next').addEventListener('click',()=>{ cal2M++; if(cal2M>11){cal2M=0;cal2Y++;} renderCal2(); });
+
+// ── EVENTS ───────────────────────────────────────────────
+let evView = 'list'; // 'list' | 'month' | 'week'
+let evTab = 'upcoming'; // 'upcoming' | 'past'
+let evMonthY, evMonthM, evWeekStart;
+let evSelectedDay = null;
+
+function rEvents() {
+  const list = $('events-list');
+
+  if (evView === 'list') {
+    const filtered = evTab==='upcoming'
+      ? events.filter(e=>evIsUpcoming(e))
+      : events.filter(e=>!evIsUpcoming(e));
+    const sorted = [...filtered].sort((a,b)=>{
+      const da=new Date(a.y||2025,a.mIdx||0,a.day), db=new Date(b.y||2025,b.mIdx||0,b.day);
+      return evTab==='upcoming' ? da-db : db-da;
+    });
+    if(!sorted.length){list.innerHTML=empty('📅',evTab==='upcoming'?'Aucun événement à venir':'Aucun événement passé');return;}
+    list.innerHTML=sorted.map(e=>evCard(e)).join('');
+    return;
+  }
+
+  if (evView === 'month') {
+    list.innerHTML = renderMonthView();
+    bindMonthEvents();
+    return;
+  }
+
+  if (evView === 'week') {
+    list.innerHTML = renderWeekView();
+    bindWeekEvents();
+    return;
+  }
+}
+
+function evCard(e) {
+  const past = !evIsUpcoming(e);
+  return `<div class="admin-card" style="${past?'opacity:0.6':''}">
+    <div class="admin-card-header">
+      <div class="admin-card-title">
+        <div class="admin-icon-box" style="background:var(--plum-pale);color:var(--plum);font-weight:700;font-size:12px;min-width:36px;flex-direction:column;gap:0;line-height:1.1;">
+          <span style="font-size:13px;font-weight:700;">${e.day}</span>
+          <span style="font-size:9px;text-transform:uppercase;">${x(e.month)}</span>
+        </div>
+        ${x(e.title)}
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;">
+        ${assigneeBadge(e.assignee)}
+        ${e.fromGcal?`<span class="gcal-badge" style="font-size:9px;">📅</span>`:''}
+      </div>
+    </div>
+    ${[e.time,e.place].filter(Boolean).length?`<div class="admin-note">${[e.time,e.place].filter(Boolean).map(s=>x(s)).join(' · ')}</div>`:''}
+    <div class="card-actions">
+      <button class="card-btn edit" data-action="edit-event" data-id="${e.id}">✏️ Modifier</button>
+      <button class="card-btn del" data-action="del-event" data-id="${e.id}">🗑</button>
+    </div>
+  </div>`;
+}
+
+// ── MONTH VIEW ────────────────────────────────────────────
+function renderMonthView() {
+  const now = new Date();
+  if (!evMonthY) { evMonthY = now.getFullYear(); evMonthM = now.getMonth(); }
+  const firstDay = new Date(evMonthY, evMonthM, 1).getDay();
+  const offset = firstDay===0?6:firstDay-1;
+  const dim = new Date(evMonthY, evMonthM+1, 0).getDate();
+  const DAYS = ['L','M','M','J','V','S','D'];
+  const MONTHS_FULL = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+  let cells = '';
+  // Prev month padding
+  const prevDim = new Date(evMonthY, evMonthM, 0).getDate();
+  for (let i=0;i<offset;i++) {
+    const d = prevDim-offset+1+i;
+    cells += `<div class="cal-month-day other-month"><span class="cal-day-num">${d}</span></div>`;
+  }
+  for (let d=1;d<=dim;d++) {
+    const isToday = d===now.getDate()&&evMonthM===now.getMonth()&&evMonthY===now.getFullYear();
+    const isPast = new Date(evMonthY,evMonthM,d) < new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    const hasEv = events.some(e=>e.day===d&&e.mIdx===evMonthM&&e.y===evMonthY);
+    const isSel = evSelectedDay && evSelectedDay.d===d && evSelectedDay.m===evMonthM && evSelectedDay.y===evMonthY;
+    cells += `<div class="cal-month-day${isToday?' today':''}${hasEv?' has-event':''}${isPast?' past':''}${isSel?' cal-month-selected':''}" data-mday="${d}">
+      <span class="cal-day-num">${d}</span>
+    </div>`;
+  }
+  // Next month padding
+  const total = offset+dim; const rem = total%7===0?0:7-(total%7);
+  for(let i=1;i<=rem;i++) cells+=`<div class="cal-month-day other-month"><span class="cal-day-num">${i}</span></div>`;
+
+  // Selected day events
+  let dayEvents = '';
+  if (evSelectedDay && evSelectedDay.m===evMonthM && evSelectedDay.y===evMonthY) {
+    const dayEvs = events.filter(e=>e.day===evSelectedDay.d&&e.mIdx===evMonthM&&e.y===evMonthY);
+    if (dayEvs.length) {
+      dayEvents = `<div class="cal-day-events">${dayEvs.map(e=>`<div class="cal-day-event-item">${e.time?e.time+' · ':''}<strong>${x(e.title)}</strong>${e.place?' — '+x(e.place):''}</div>`).join('')}</div>`;
+    }
+  }
+
+  return `<div class="cal-month-view">
+    <div class="cal-month-nav">
+      <button class="cal-arrow" id="ev-month-prev">‹</button>
+      <div class="cal-month-nav-title">${MONTHS_FULL[evMonthM]} ${evMonthY}</div>
+      <button class="cal-arrow" id="ev-month-next">›</button>
+    </div>
+    <div class="cal-month-grid-header">${DAYS.map(d=>`<span>${d}</span>`).join('')}</div>
+    <div class="cal-month-grid" id="ev-month-grid">${cells}</div>
+    ${dayEvents}
+  </div>`;
+}
+
+function bindMonthEvents() {
+  $('ev-month-prev')?.addEventListener('click',()=>{ evMonthM--; if(evMonthM<0){evMonthM=11;evMonthY--;} rEvents(); });
+  $('ev-month-next')?.addEventListener('click',()=>{ evMonthM++; if(evMonthM>11){evMonthM=0;evMonthY++;} rEvents(); });
+  $('ev-month-grid')?.addEventListener('click', e=>{
+    const day = e.target.closest('[data-mday]'); if(!day) return;
+    const d = parseInt(day.dataset.mday);
+    evSelectedDay = {d, m:evMonthM, y:evMonthY};
+    rEvents();
+  });
+}
+
+// ── WEEK VIEW ─────────────────────────────────────────────
+function renderWeekView() {
+  const now = new Date();
+  if (!evWeekStart) {
+    const day = now.getDay(); const diff = day===0?-6:1-day;
+    evWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()+diff);
+  }
+  const DAYS_SHORT = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  const weekEnd = new Date(evWeekStart.getTime() + 6*86400000);
+  const fmtDate = d => d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+
+  let dayCols = '';
+  const weekEvs = [];
+  for (let i=0;i<7;i++) {
+    const cur = new Date(evWeekStart.getTime()+i*86400000);
+    const d=cur.getDate(), m=cur.getMonth(), y=cur.getFullYear();
+    const isToday = d===now.getDate()&&m===now.getMonth()&&y===now.getFullYear();
+    const isPast = cur < new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    const dayEvs = events.filter(e=>e.day===d&&e.mIdx===m&&e.y===y);
+    if(dayEvs.length) weekEvs.push(...dayEvs.map(e=>({...e, _weekDay:i})));
+    dayCols += `<div class="cal-week-day-col">
+      <span class="cal-week-day-label">${DAYS_SHORT[i]}</span>
+      <div class="cal-week-day-num${isToday?' today':''}${dayEvs.length?' has-event':''}${isPast?' past':''}">${d}</div>
+    </div>`;
+  }
+
+  const evList = weekEvs.length
+    ? weekEvs.sort((a,b)=>a._weekDay-b._weekDay).map(e=>evCard(e)).join('')
+    : `<div class="empty"><div class="empty-icon">📅</div><div class="empty-text">Aucun événement cette semaine</div></div>`;
+
+  return `<div class="cal-week-view">
+    <div class="cal-week-nav">
+      <button class="cal-arrow" id="ev-week-prev">‹</button>
+      <div class="cal-week-nav-title">${fmtDate(evWeekStart)} – ${fmtDate(weekEnd)}</div>
+      <button class="cal-arrow" id="ev-week-next">›</button>
+    </div>
+    <div class="cal-week-days">${dayCols}</div>
+    <div class="cal-week-events">${evList}</div>
+  </div>`;
+}
+
+function bindWeekEvents() {
+  $('ev-week-prev')?.addEventListener('click',()=>{ evWeekStart=new Date(evWeekStart.getTime()-7*86400000); rEvents(); });
+  $('ev-week-next')?.addEventListener('click',()=>{ evWeekStart=new Date(evWeekStart.getTime()+7*86400000); rEvents(); });
+}
+
+// View toggle
+document.querySelectorAll('.ev-view-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    evView=btn.dataset.view;
+    document.querySelectorAll('.ev-view-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    rEvents();
+  });
+});
+
+// Tab toggle
+$('ev-tab-upcoming').addEventListener('click',()=>{
+  evTab='upcoming';
+  $('ev-tab-upcoming').classList.add('active'); $('ev-tab-past').classList.remove('active','done-tab'); $('ev-tab-past').classList.add('done-tab');
+  rEvents();
+});
+$('ev-tab-past').addEventListener('click',()=>{
+  evTab='past';
+  $('ev-tab-past').classList.add('active','done-tab'); $('ev-tab-upcoming').classList.remove('active');
+  rEvents();
+});
+$('btn-open-event').addEventListener('click', () => { initCal(); evTimeActive=false; openModal('event-modal'); });
+$('btn-confirm-event').addEventListener('click', async () => {
+  const title=$('ev-title').value.trim();
+  if(!title||!calSel){ if(!calSel){$('cal-grid').style.outline='2px solid var(--terracotta)';setTimeout(()=>$('cal-grid').style.outline='',1000);} return; }
+  const reminder = $('ev-reminder').value;
+  const time = getWheelTime(evTime, evTimeActive);
+  const newEvent = {id:uid++,title,day:calSel.d,month:MONTHS_SHORT[calSel.m],mIdx:calSel.m,y:calSel.y,time,place:$('ev-place').value.trim(),reminder,assignee:$('ev-assignee').value||'both'};
+  events.unshift(newEvent);
+  closeModal('event-modal');
+  ['ev-title','ev-place'].forEach(id=>$(id).value='');
+  $('ev-reminder').value='1440'; evTimeActive=false;
+  await save('nido-events',events);
+  if (gcalToken) {
+    try {
+      const calId = localStorage.getItem('nido-gcal-calid') || 'primary';
+      const ge = await gcalCreateEvent(gcalToken, calId, newEvent);
+      newEvent.gcalId = ge.id;
+      await save('nido-events', events);
+    } catch(e) { console.warn('gcal push failed', e); }
+  }
+});
+let editEventId=null;
+$('events-list').addEventListener('click', async e=>{
+  const el=e.target.closest('[data-action]'); if(!el) return;
+  const id=parseInt(el.dataset.id);
+  if(el.dataset.action==='del-event'){
+    const ev = events.find(i=>i.id===id);
+    events = events.filter(i=>i.id!==id);
+    save('nido-events', events);
+    // Delete from Google Calendar if synced
+    if (gcalToken && ev?.gcalId) {
+      try {
+        const calId = localStorage.getItem('nido-gcal-calid') || 'primary';
+        await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events/${ev.gcalId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${gcalToken}` }
+        });
+      } catch(e) { console.warn('gcal delete failed', e); }
+    }
+  }
+  if(el.dataset.action==='edit-event'){
+    const ev=events.find(i=>i.id===id); if(!ev) return;
+    editEventId=id;
+    $('edit-ev-title').value=ev.title;
+    $('edit-ev-time').value=ev.time||'';
+    $('edit-ev-place').value=ev.place||'';
+    $('edit-ev-reminder').value=ev.reminder||'1440';
+    $('edit-ev-assignee').value=ev.assignee||'both';
+    initCal2(ev.mIdx!=null?{d:ev.day,m:ev.mIdx,y:ev.y||new Date().getFullYear()}:null);
+    setTimeout(()=>initEditEvWheel(ev.time||''), 50);
+    openModal('edit-event-modal');
+  }
+});
+$('btn-save-event').addEventListener('click', async () => {
+  const title=$('edit-ev-title').value.trim(); if(!title) return;
+  const ev=events.find(i=>i.id===editEventId); if(!ev) return;
+  ev.title=title;
+  ev.time=getWheelTime(editEvTime, editEvTimeActive);
+  ev.place=$('edit-ev-place').value.trim();
+  ev.reminder=$('edit-ev-reminder').value;
+  ev.assignee=$('edit-ev-assignee').value||'both';
+  if(cal2Sel){ev.day=cal2Sel.d;ev.month=MONTHS_SHORT[cal2Sel.m];ev.mIdx=cal2Sel.m;ev.y=cal2Sel.y;}
+  closeModal('edit-event-modal'); await save('nido-events',events);
+  // Update in Google Calendar if connected and event was previously synced
+  if (gcalToken && ev.gcalId) {
+    try {
+      const calId = localStorage.getItem('nido-gcal-calid') || 'primary';
+      const ge = await gcalCreateEvent(gcalToken, calId, ev);
+      // gcalCreateEvent does POST — for update we need PATCH
+      const pad = n=>String(n).padStart(2,'0');
+      const dateStr = `${ev.y}-${pad(ev.mIdx+1)}-${pad(ev.day)}`;
+      let start, end;
+      if (ev.time) {
+        const parts = ev.time.replace('h',':').split(':');
+        const h=parseInt(parts[0]); const m=parseInt(parts[1]||'0');
+        start = { dateTime:`${dateStr}T${pad(h)}:${pad(m)}:00`, timeZone:'Europe/Paris' };
+        end   = { dateTime:`${dateStr}T${pad(h<23?h+1:23)}:${pad(m)}:00`, timeZone:'Europe/Paris' };
+      } else {
+        start = { date: dateStr };
+        end   = { date: `${ev.y}-${pad(ev.mIdx+1)}-${pad(ev.day+1)}` };
+      }
+      const reminders = ev.reminder
+        ? { useDefault:false, overrides:[{method:'popup',minutes:parseInt(ev.reminder)},{method:'email',minutes:parseInt(ev.reminder)}] }
+        : { useDefault:false, overrides:[] };
+      await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events/${ev.gcalId}`, {
+        method:'PATCH',
+        headers:{Authorization:`Bearer ${gcalToken}`,'Content-Type':'application/json'},
+        body: JSON.stringify({ summary:ev.title, location:ev.place||'', start, end, reminders })
+      });
+    } catch(e) { console.warn('gcal event update failed', e); }
+  }
+});
+
+// ── GOOGLE CALENDAR ──────────────────────────────────────
+const GCAL_CLIENT_ID = '123618676547-5n6cpurclf01kbbcvrqvpar7jn95p70n.apps.googleusercontent.com';
+const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events';
+let gcalToken = null;
+let gcalTokenExpiry = 0;
+let gcalRefreshTimer = null;
+
+function gcalSetStatus(msg, color='var(--light)') {
+  const el = $('gcal-status');
+  el.style.display = msg ? 'block' : 'none';
+  el.style.color = color;
+  el.textContent = msg;
+}
+
+function gcalSignIn(silent=false) {
+  return new Promise((resolve, reject) => {
+    if (!window.google) { reject('Google API non chargée'); return; }
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: GCAL_CLIENT_ID,
+      scope: GCAL_SCOPES,
+      prompt: silent ? '' : undefined,
+      callback: (resp) => {
+        if (resp.error) { reject(resp.error); return; }
+        gcalToken = resp.access_token;
+        gcalTokenExpiry = Date.now() + ((resp.expires_in||3600) - 60) * 1000;
+        try { localStorage.setItem('nido-gcal-token', gcalToken); } catch(e) {}
+        scheduleTokenRefresh();
+        resolve(gcalToken);
+      }
+    });
+    if (silent) client.requestAccessToken({prompt:''});
+    else client.requestAccessToken();
+  });
+}
+
+function scheduleTokenRefresh() {
+  if (gcalRefreshTimer) clearTimeout(gcalRefreshTimer);
+  const delay = gcalTokenExpiry - Date.now();
+  if (delay > 0) {
+    gcalRefreshTimer = setTimeout(async () => {
+      try { await gcalSignIn(true); }
+      catch(e) { gcalToken=null; try{localStorage.removeItem('nido-gcal-token');}catch(e2){} }
+    }, delay);
+  }
+}
+
+async function gcalGetToken() {
+  if (gcalToken && Date.now() < gcalTokenExpiry) return gcalToken;
+  try { return await gcalSignIn(true); } catch(e) {}
+  return await gcalSignIn(false);
+}
+
+// Restore on load + schedule refresh
+try {
+  const t = localStorage.getItem('nido-gcal-token');
+  if (t) { gcalToken=t; gcalTokenExpiry=Date.now()+5*60*1000; scheduleTokenRefresh(); }
+} catch(e) {}
+
+async function gcalFindCalendar(token, name='Famille') {
+  const res = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList', {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('auth');
+  const data = await res.json();
+  const cal = data.items?.find(c => c.summary?.toLowerCase().includes(name.toLowerCase()));
+  return cal?.id || 'primary';
+}
+
+async function gcalFetchEvents(token, calId) {
+  const now = new Date();
+  const min = now.toISOString();
+  const max = new Date(now.getFullYear(), now.getMonth()+3, 1).toISOString();
+  const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events?timeMin=${min}&timeMax=${max}&singleEvents=true&orderBy=startTime&maxResults=50`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) throw new Error('fetch');
+  const data = await res.json();
+  return data.items || [];
+}
+
+async function gcalCreateEvent(token, calId, nidoEvent) {
+  // Build date string in local format YYYY-MM-DD to avoid UTC shift
+  const pad = n => String(n).padStart(2,'0');
+  const dateStr = `${nidoEvent.y}-${pad(nidoEvent.mIdx+1)}-${pad(nidoEvent.day)}`;
+  let start, end;
+  if (nidoEvent.time) {
+    const parts = nidoEvent.time.replace('h',':').split(':');
+    const h = parseInt(parts[0]||'9');
+    const m = parseInt(parts[1]||'0');
+    // Use RFC3339 local datetime string — no UTC conversion
+    const startStr = `${dateStr}T${pad(h)}:${pad(m)}:00`;
+    const endH = h + 1 >= 24 ? 23 : h + 1;
+    const endStr = `${dateStr}T${pad(endH)}:${pad(m)}:00`;
+    start = { dateTime: startStr, timeZone: 'Europe/Paris' };
+    end   = { dateTime: endStr,   timeZone: 'Europe/Paris' };
+  } else {
+    // All-day event
+    const nextDay = new Date(nidoEvent.y, nidoEvent.mIdx, nidoEvent.day + 1);
+    const endStr = `${nextDay.getFullYear()}-${pad(nextDay.getMonth()+1)}-${pad(nextDay.getDate())}`;
+    start = { date: dateStr };
+    end   = { date: endStr };
+  }
+  const body = {
+    summary: nidoEvent.title,
+    location: nidoEvent.place || '',
+    start, end,
+    reminders: nidoEvent.reminder
+      ? { useDefault: false, overrides: [{ method: 'popup', minutes: parseInt(nidoEvent.reminder) }, { method: 'email', minutes: parseInt(nidoEvent.reminder) }] }
+      : { useDefault: false, overrides: [] }
+  };
+  const res = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error('create');
+  return await res.json();
+}
+
+$('btn-gcal-sync').addEventListener('click', async () => {
+  gcalSetStatus('Connexion à Google Calendar…', 'var(--amber)');
+  try {
+    const token = await gcalGetToken();
+    gcalSetStatus('Récupération de l\'agenda "Famille"…', 'var(--amber)');
+    const calId = await gcalFindCalendar(token, 'Famille');
+    gcalSetStatus('Chargement des événements…', 'var(--amber)');
+    const gcalEvents = await gcalFetchEvents(token, calId);
+
+    // Merge Google Calendar events into Nido (avoid duplicates by gcalId)
+    let added = 0;
+    for (const ge of gcalEvents) {
+      if (events.find(e=>e.gcalId===ge.id)) continue;
+      const startRaw = ge.start?.dateTime || ge.start?.date;
+      if (!startRaw) continue;
+      const d = new Date(startRaw);
+      const time = ge.start?.dateTime ? `${String(d.getHours()).padStart(2,'0')}h${String(d.getMinutes()).padStart(2,'0')}` : '';
+      events.push({
+        id: uid++, gcalId: ge.id,
+        title: ge.summary || '(sans titre)',
+        day: d.getDate(), month: MONTHS_SHORT[d.getMonth()], mIdx: d.getMonth(), y: d.getFullYear(),
+        time, place: ge.location || '',
+        fromGcal: true
+      });
+      added++;
+    }
+    if (added > 0) await save('nido-events', events);
+    gcalSetStatus(`✅ ${added} événement(s) importé(s) depuis "Famille"`, 'var(--green)');
+    setTimeout(()=>gcalSetStatus(''), 4000);
+
+    // Store calId for future event creation
+    try { localStorage.setItem('nido-gcal-calid', calId); } catch(e) {}
+  } catch(err) {
+    if (err==='auth' || err?.message==='auth') {
+      gcalToken=null;
+      try { localStorage.removeItem('nido-gcal-token'); } catch(e) {}
+      gcalSetStatus('Session expirée — reconnecte-toi', 'var(--terracotta)');
+    } else {
+      gcalSetStatus('Erreur de synchronisation', 'var(--terracotta)');
+    }
+  }
+});
+
+// ── RECIPES ──────────────────────────────────────────────
+let recipes = [];
+let newRecipeIngs = [];
+
+const D_recipes = [];
+
+async function loadRecipes() {
+  recipes = await load('nido-recipes', D_recipes);
+}
+
+function renderRecipesList() {
+  const list = $('recipes-list');
+  if (!recipes.length) { list.innerHTML = `<div class="empty"><div class="empty-icon">🍽</div><div class="empty-text">Aucune recette — créez-en une !</div></div>`; return; }
+  list.innerHTML = recipes.map(r => `
+    <div class="recipe-card">
+      <div class="recipe-card-header">
+        <div class="recipe-card-title">🍽 ${x(r.name)}</div>
+        <div style="display:flex;gap:5px;">
+          <button class="recipe-add-btn" style="background:var(--terra-pale);border-color:var(--terracotta);color:var(--terracotta);" data-action="add-recipe" data-id="${r.id}">+ Liste</button>
+          <button class="recipe-add-btn" style="background:var(--blue-pale);border-color:var(--blue);color:var(--blue);" data-action="edit-recipe" data-id="${r.id}">✏️</button>
+          <button class="recipe-ing-del" data-action="del-recipe" data-id="${r.id}">🗑</button>
+        </div>
+      </div>
+      <div class="recipe-card-ings">${r.ingredients.map(i=>`${i.qty?i.qty+' ':''}${i.unit?i.unit+' ':''}${i.name}`).join(' · ')}</div>
+    </div>`).join('');
+}
+
+// Edit recipe
+let editRecipeId = null;
+let editRecipeIngs = [];
+
+function openEditRecipe(id) {
+  const r = recipes.find(i=>i.id===id); if(!r) return;
+  editRecipeId = id;
+  editRecipeIngs = [...r.ingredients.map(i=>({...i}))];
+  $('edit-recipe-name').value = r.name;
+  renderEditRecipeIngs();
+  openModal('edit-recipe-modal');
+}
+
+function renderEditRecipeIngs() {
+  $('edit-recipe-ingredients').innerHTML = editRecipeIngs.map((ing,i)=>`
+    <div class="recipe-ing-item">
+      <span>${ing.qty?ing.qty+' ':''}${ing.unit?ing.unit+' ':''}${x(ing.name)}</span>
+      <button class="recipe-ing-del" data-edit-ing-idx="${i}">×</button>
+    </div>`).join('');
+  $('edit-recipe-ingredients').querySelectorAll('[data-edit-ing-idx]').forEach(btn=>{
+    btn.addEventListener('click',()=>{ editRecipeIngs.splice(parseInt(btn.dataset.editIngIdx),1); renderEditRecipeIngs(); });
+  });
+}
+
+$('btn-edit-add-ing').addEventListener('click',()=>{
+  const name=$('edit-recipe-ing-name').value.trim(); if(!name) return;
+  editRecipeIngs.push({name, qty:$('edit-recipe-ing-qty').value.trim(), unit:$('edit-recipe-ing-unit').value});
+  $('edit-recipe-ing-name').value=''; $('edit-recipe-ing-qty').value=''; $('edit-recipe-ing-unit').value='';
+  renderEditRecipeIngs();
+});
+$('edit-recipe-ing-name').addEventListener('keydown',e=>{if(e.key==='Enter') $('btn-edit-add-ing').click();});
+
+$('btn-update-recipe').addEventListener('click', async()=>{
+  const name=$('edit-recipe-name').value.trim(); if(!name) return;
+  const r=recipes.find(i=>i.id===editRecipeId); if(!r) return;
+  r.name=name; r.ingredients=[...editRecipeIngs];
+  closeModal('edit-recipe-modal');
+  await save('nido-recipes',recipes);
+  renderRecipesList();
+});
+
+$('btn-open-add-recipe').addEventListener('click', () => {
+  newRecipeIngs = [];
+  $('recipe-name').value = '';
+  $('recipe-ing-name').value = '';
+  $('recipe-ing-qty').value = '';
+  renderNewRecipeIngs();
+  openModal('add-recipe-modal');
+});
+
+function renderNewRecipeIngs() {
+  $('recipe-ingredients').innerHTML = newRecipeIngs.map((ing, i) => `
+    <div class="recipe-ing-item">
+      <span>${ing.qty?ing.qty+' ':''} ${ing.unit?ing.unit+' ':''}${x(ing.name)}</span>
+      <button class="recipe-ing-del" data-ing-idx="${i}">×</button>
+    </div>`).join('');
+  $('recipe-ingredients').querySelectorAll('[data-ing-idx]').forEach(btn => {
+    btn.addEventListener('click', () => { newRecipeIngs.splice(parseInt(btn.dataset.ingIdx),1); renderNewRecipeIngs(); });
+  });
+}
+
+$('btn-add-ing').addEventListener('click', () => {
+  const name = $('recipe-ing-name').value.trim(); if (!name) return;
+  newRecipeIngs.push({ name, qty: $('recipe-ing-qty').value.trim(), unit: $('recipe-ing-unit').value });
+  $('recipe-ing-name').value = ''; $('recipe-ing-qty').value = ''; $('recipe-ing-unit').value = '';
+  renderNewRecipeIngs();
+});
+$('recipe-ing-name').addEventListener('keydown', e => { if(e.key==='Enter') $('btn-add-ing').click(); });
+
+$('btn-save-recipe').addEventListener('click', async () => {
+  const name = $('recipe-name').value.trim(); if (!name || !newRecipeIngs.length) return;
+  recipes.unshift({ id: uid++, name, ingredients: [...newRecipeIngs] });
+  closeModal('add-recipe-modal');
+  await save('nido-recipes', recipes);
+  renderRecipesList();
+});
+
+$('recipes-list').addEventListener('click', async e => {
+  const el = e.target.closest('[data-action]'); if (!el) return;
+  const id = parseInt(el.dataset.id);
+  if (el.dataset.action === 'del-recipe') {
+    recipes = recipes.filter(r => r.id !== id);
+    await save('nido-recipes', recipes);
+    renderRecipesList();
+  }
+  if (el.dataset.action === 'edit-recipe') {
+    openEditRecipe(id);
+  }
+  if (el.dataset.action === 'add-recipe') {
+    const recipe = recipes.find(r => r.id === id); if (!recipe) return;
+    for (const ing of recipe.ingredients) {
+      const rayon = await detectRayonAI(ing.name);
+      courses.unshift({ id: uid++, text: ing.name, done: false, rayon, r: user.role, n: user.name, qty: ing.qty, unit: ing.unit });
+    }
+    await save('nido-courses', courses);
+    closeModal('recipes-modal');
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t=>{ t.className='tab '+t.dataset.tab; });
+    $('section-courses').classList.add('active');
+    document.querySelector('[data-tab="courses"]').classList.add('active','courses');
+  }
+});
+
+// ── AUTOCOMPLETE ──────────────────────────────────────────
+const ciInput = $('ci');
+const ciSuggestions = $('ci-suggestions');
+
+ciInput.addEventListener('input', () => {
+  const val = ciInput.value.trim().toLowerCase();
+  if (val.length < 2) { ciSuggestions.style.display = 'none'; return; }
+  const habits = getHabits();
+  const matches = habits.filter(h => h.text.toLowerCase().includes(val) && !courses.find(c => !c.done && c.text.toLowerCase() === h.text.toLowerCase()));
+  if (!matches.length) { ciSuggestions.style.display = 'none'; return; }
+  ciSuggestions.style.display = 'block';
+  ciSuggestions.innerHTML = matches.slice(0,5).map(h => `
+    <div class="suggestion-item" data-text="${x(h.text)}" data-rayon="${h.rayon||'autre'}">
+      <span>${x(h.text)}</span>
+      <span class="suggestion-rayon">${getRayon(h.rayon||'autre').emoji}</span>
+    </div>`).join('');
+});
+
+ciSuggestions.addEventListener('click', async e => {
+  const item = e.target.closest('.suggestion-item'); if (!item) return;
+  const text = item.dataset.text; const rayon = item.dataset.rayon;
+  courses.unshift({ id: uid++, text, done: false, rayon, r: user.role, n: user.name, qty: '', unit: '' });
+  addToHabits(text, rayon);
+  ciInput.value = ''; ciSuggestions.style.display = 'none';
+  await save('nido-courses', courses);
+});
+
+document.addEventListener('click', e => {
+  if (!ciInput.contains(e.target) && !ciSuggestions.contains(e.target)) ciSuggestions.style.display = 'none';
+});
+function rFeedbacks() {
+  const list=$('feedback-list');
+  if(!feedbacks.length){list.innerHTML=empty('💬','Aucune suggestion pour l\'instant');return;}
+  list.innerHTML=feedbacks.map(f=>`
+    <div class="feedback-card">
+      <div class="fb-header">
+        <div class="fb-dot" style="background:${COLORS[f.r]||'#999'}">${f.n?f.n[0]:'?'}</div>
+        <div class="fb-author">${x(f.n)}</div>
+        <div class="fb-date">${x(f.date)}</div>
+      </div>
+      <div class="fb-text">${x(f.text)}</div>
+      <div class="fb-tags">
+        <button class="fb-tag ${f.tag==='idea'?'t-idea':''}" data-action="tag-fb" data-id="${f.id}" data-tag="idea">💡 Idée</button>
+        <button class="fb-tag ${f.tag==='bug'?'t-bug':''}" data-action="tag-fb" data-id="${f.id}" data-tag="bug">🐛 Bug</button>
+        <button class="fb-tag ${f.tag==='done'?'t-done':''}" data-action="tag-fb" data-id="${f.id}" data-tag="done">✅ Fait</button>
+        <button class="fb-del" data-action="del-fb" data-id="${f.id}">Supprimer</button>
+      </div>
+    </div>`).join('');
+}
+$('btn-add-feedback').addEventListener('click', addFeedback);
+$('fi').addEventListener('keydown', e=>{ if(e.key==='Enter') addFeedback(); });
+async function addFeedback() {
+  const inp=$('fi'), text=inp.value.trim(); if(!text) return;
+  const date=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+  feedbacks.unshift({id:uid++,text,r:user.role,n:user.name,date,tag:'idea'});
+  inp.value=''; await save('nido-feedbacks',feedbacks);
+}
+$('feedback-list').addEventListener('click', async e=>{
+  const el=e.target.closest('[data-action]'); if(!el) return;
+  const id=parseInt(el.dataset.id);
+  if(el.dataset.action==='tag-fb'){ const f=feedbacks.find(i=>i.id===id); if(f){f.tag=el.dataset.tag; await save('nido-feedbacks',feedbacks);} }
+  if(el.dataset.action==='del-fb'){ feedbacks=feedbacks.filter(i=>i.id!==id); await save('nido-feedbacks',feedbacks); }
+});
+
+// ── CLAUDE BUTTON ────────────────────────────────────────
+$('btn-send-claude').addEventListener('click', () => {
+  const pending = feedbacks.filter(f=>f.tag!=='done');
+  const done = feedbacks.filter(f=>f.tag==='done');
+
+  const msg = `Bonjour Claude ! Je t'envoie les suggestions d'amélioration pour l'app Nido 🪺 (notre app famille partagée : courses, tâches, administratif, événements, grossesse/bébé).
+
+━━━ SUGGESTIONS EN ATTENTE (${pending.length}) ━━━
+${pending.length ? pending.map((f,i)=>`${i+1}. [${f.tag==='idea'?'💡 Idée':'🐛 Bug'}] ${f.text}\n   — ${f.n}, ${f.date}`).join('\n') : 'Aucune suggestion en attente.'}
+
+━━━ DÉJÀ TRAITÉ (${done.length}) ━━━
+${done.length ? done.map(f=>`• ${f.text}`).join('\n') : 'Aucune.'}
+
+━━━ CONTEXTE APP ━━━
+• App PWA hébergée sur Netlify
+• Backend Firebase Firestore (temps réel)
+• Utilisateurs : Papa (V) + Maman (M)
+• Version actuelle : ${currentVersion || 'v1'}
+• Fonctionnalités : Courses partagées, Tâches, Administratif (modifier/supprimer), Événements avec calendrier (modifier/supprimer), Améliorations collaboratives, Historique des versions, Mémorisation connexion
+
+Peux-tu analyser ces suggestions, me poser des questions si nécessaire pour bien les comprendre, puis générer le nouveau index.html avec les améliorations intégrées ?`;
+
+  $('claude-msg').textContent = msg;
+  openModal('claude-modal');
+});
+
+$('btn-copy-claude').addEventListener('click', () => {
+  const text = $('claude-msg').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    $('btn-copy-claude').textContent = '✅ Copié !';
+    setTimeout(()=>{ $('btn-copy-claude').textContent = '📋 Copier le message'; }, 2000);
+  });
+});
+
+$('btn-share-claude').addEventListener('click', async () => {
+  const text = $('claude-msg').textContent;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'Suggestions Nido 🪺', text });
+    } catch(e) { /* user cancelled */ }
+  } else {
+    // Fallback: copy
+    navigator.clipboard.writeText(text).then(() => {
+      $('btn-share-claude').textContent = '✅ Copié !';
+      setTimeout(()=>{ $('btn-share-claude').textContent = '📤 Partager'; }, 2000);
+    });
+  }
+});
+
+// ── VERSIONS ─────────────────────────────────────────────
+let currentVersion = null;
+
+async function saveVersion(label) {
+  try {
+    const code = document.documentElement.outerHTML;
+    const versionData = {
+      label: label || `Version du ${new Date().toLocaleDateString('fr-FR')}`,
+      date: new Date().toISOString(),
+      dateDisplay: new Date().toLocaleDateString('fr-FR', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),
+      code,
+    };
+    await addDoc(collection(db, 'nido-versions'), versionData);
+  } catch(e) { console.error('saveVersion error', e); }
+}
+
+async function loadVersions() {
+  try {
+    const q = query(collection(db, 'nido-versions'), orderBy('date','desc'));
+    const snap = await getDocs(q);
+    const versions = [];
+    snap.forEach(d => versions.push({id:d.id, ...d.data()}));
+    return versions;
+  } catch(e) { return []; }
+}
+
+$('btn-open-versions').addEventListener('click', async () => {
+  $('versions-list').innerHTML = '<div class="loading">Chargement…</div>';
+  openModal('versions-modal');
+  const versions = await loadVersions();
+  if (!versions.length) {
+    $('versions-list').innerHTML = empty('🕓', 'Aucune version sauvegardée<br><small>Les versions sont créées à chaque déploiement via Claude</small>');
+    return;
+  }
+  $('versions-list').innerHTML = versions.map((v, i) => `
+    <div class="version-card ${i===0?'current':''}">
+      <div class="version-badge">${i===0?'Actuelle':`v${versions.length-i}`}</div>
+      <div class="version-info">
+        <div class="version-label">${x(v.label)}</div>
+        <div class="version-date">${x(v.dateDisplay)}</div>
+      </div>
+      ${i>0 ? `<button class="version-restore" data-vid="${v.id}">Restaurer</button>` : '<span style="font-size:11px;color:var(--green)">✓ En ligne</span>'}
+    </div>`).join('');
+
+  $('versions-list').addEventListener('click', async e => {
+    const btn = e.target.closest('.version-restore'); if(!btn) return;
+    const vid = btn.dataset.vid;
+    const version = versions.find(v=>v.id===vid); if(!version) return;
+    if(!confirm(`Restaurer "${version.label}" ? L'app reviendra à cette version.`)) return;
+    // Download the old code as a file for re-deployment
+    const blob = new Blob([version.code], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download='index.html'; a.click();
+    URL.revokeObjectURL(url);
+    closeModal('versions-modal');
+  });
+});
+
+// ── MODALS ───────────────────────────────────────────────
+function openModal(id) {
+  $(id).classList.add('open');
+  if (id==='event-modal') { initCal(); setTimeout(()=>initEventWheel(''), 50); }
+  setTimeout(()=>{ const inp=$(id).querySelector('input.modal-input'); if(inp) inp.focus(); }, 300);
+}
+function closeModal(id) { $(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-cancel').forEach(btn => {
+  btn.addEventListener('click', () => closeModal(btn.dataset.close));
+});
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
