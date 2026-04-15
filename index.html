@@ -2071,8 +2071,11 @@ function scheduleTokenRefresh() {
 }
 
 async function gcalGetToken() {
+  // Token still valid
   if (gcalToken && Date.now() < gcalTokenExpiry) return gcalToken;
-  try { return await gcalSignIn(true); } catch(e) {}
+  // Clear stale token and force interactive sign-in
+  gcalToken = null;
+  try { localStorage.removeItem('nido-gcal-token'); } catch(e) {}
   return await gcalSignIn(false);
 }
 
@@ -2175,12 +2178,12 @@ $('btn-gcal-sync').addEventListener('click', async () => {
     // Store calId for future event creation
     try { localStorage.setItem('nido-gcal-calid', calId); } catch(e) {}
   } catch(err) {
-    if (err==='auth' || err?.message==='auth') {
-      gcalToken=null;
-      try { localStorage.removeItem('nido-gcal-token'); } catch(e) {}
-      gcalSetStatus('Session expirée — reconnecte-toi', 'var(--terracotta)');
+    gcalToken = null; gcalTokenExpiry = 0;
+    try { localStorage.removeItem('nido-gcal-token'); } catch(e) {}
+    if (err==='auth' || err?.message==='auth' || err?.message==='fetch') {
+      gcalSetStatus('Session expirée — appuyez à nouveau pour reconnecter', 'var(--terracotta)');
     } else {
-      gcalSetStatus('Erreur de synchronisation', 'var(--terracotta)');
+      gcalSetStatus('Erreur — réessayez', 'var(--terracotta)');
     }
   }
 });
